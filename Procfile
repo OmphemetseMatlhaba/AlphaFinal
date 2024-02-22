@@ -1,1 +1,1 @@
-web gunicorn AlphaHarvest.wsgi:application --log-file -
+web: gunicorn AlphaHarvest.wsgi:application --preload
