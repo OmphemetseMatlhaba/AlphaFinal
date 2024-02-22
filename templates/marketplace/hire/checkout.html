@@ -1,0 +1,68 @@
+
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block content %}
+
+<script src="https://js.stripe.com/v3/"></script>
+
+
+<header>
+    <img src="{% static 'images/farmers/hero1.png' %}" alt="Banner Image Description">
+</header>
+
+<div class="container">
+
+    <form id="payment-form">
+        <div id="card-element"><!--Stripe.js injects the Card Element--></div>
+        <button id="submit">
+            Pay {{ hire_request.total_cost }}
+        </button>
+    </form>
+    
+    <script>
+    var stripe = Stripe('pk_test_51NsFmAEuJhOtyzrqlIsKiN83EUnqZaLyn2XuGodozoGzj7xSdaxz1lPFRt5dVq4pzRFFCDBgWH0i0slpvawn7Ocs00lM3eFRou');
+    var elements = stripe.elements();
+
+    var card = elements.create('card');
+
+    card.mount('#card-element');
+
+    var form = document.getElementById('payment-form');
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        stripe.createToken(card).then(function(result) {
+            if (result.error) {
+                var errorElement = document.getElementById('card-errors');
+                errorElement.textContent = result.error.message;
+            } else {
+                stripeTokenHandler(result.token);
+            }
+        });
+    });
+
+    function stripeTokenHandler(token) {
+        var form = document.getElementById('payment-form');
+        var hiddenInput = document.createElement('input');
+        hiddenInput.setAttribute('type', 'hidden');
+        hiddenInput.setAttribute('name', 'stripe_token');
+        hiddenInput.setAttribute('value', token.id);
+        form.appendChild(hiddenInput);
+
+        form.submit();
+    }
+</script>
+     
+  
+</div>
+<style>
+
+
+
+img {
+        max-width: 100%; /* Ensure the image doesn't exceed its container width */
+        height: auto; /* Maintain the image's aspect ratio */
+        border-radius: 8px; /* Add rounded corners to the image */
+    }
+</style>
+{% endblock %}

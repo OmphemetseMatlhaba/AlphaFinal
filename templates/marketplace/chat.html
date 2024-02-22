@@ -1,0 +1,122 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+   
+
+    <h1> New Chat</h1>
+    
+
+    <form method="post" action="" class="chat-form">
+
+        {% csrf_token %}
+
+        <div class="form-group">
+            {{ form.as_p }}
+        </div>
+
+        {% if form.errors or form.non_field_errors %}
+        <div class="error-messages">
+            {% for field in form %}
+                {{ field.errors }} 
+            {% endfor %} 
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <button class="btn-send">Send</button>
+    </form>
+
+</div>
+
+<style>
+    nav {
+        overflow: hidden;
+      
+        padding: 0.5em;
+      }
+      
+      nav ul {
+        list-style-type: none;
+        padding: 0;
+        display: flex;
+        justify-content: space-around;
+      }
+      
+      nav ul li {
+        display: inline;
+      }
+      
+      nav ul li a {
+        color: #333;
+        text-decoration: none;
+        position: relative;
+      }
+      
+      nav ul li a.active::after {
+        content: "";
+        display: block;
+        height: 1px;
+        background-color: #333;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        display: inline;
+        border-bottom: 1px solid #333;
+      }
+      
+
+    h1 {
+        color: #333;
+        text-align: center;
+    }
+
+    .chat-form {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: #333;
+        font-weight: bold;
+    }
+
+    .form-group input, .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    .error-messages {
+        color: #ff0000;
+        margin-bottom: 15px;
+    }
+
+    .btn-send {
+        background-color: #007bff;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-send:hover {
+        background-color: #0056b3;
+    }
+</style>
+
+{% endblock %}

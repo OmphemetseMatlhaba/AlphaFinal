@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Alpha | {{ event.name }}{% endblock %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'lib/flipdown/flipdown.css' %}">
+<div class="col-md-12 text-center">
+   <h1>{{ event.name }}</h1>
+</div>
+<div class="container-fluid d-flex align-items-center justify-content-center" style="background: rgb(0, 0, 0, 0.6); height: 500px;" data-parallax="scroll" data-image-src="{% if event.image_cover %}{{ event.image_cover.url }}{% else %}https://img.freepik.com/free-photo/green-meadow-meanders-into-wheat-field-horizon-generated-by-ai_188544-36101.jpg?t=st=1705662392~exp=1705665992~hmac=3328d1e4e7e8dc4a1e830124af2904824b6f5ae58bb2fc4453612b1c6ba04ae6&w=996{% endif %}">
+    <div id="flipdown" class="flipdown"></div>
+</div>
+<div class="container mt-4 d-flex align-items-center justify-content-center text-justify">
+   <table class="table table-borderless" style="width: 70%;">
+    <tr>
+        <td><h5>Date</h5></td>
+        <td><p>{{ event.date_time|date:"j F Y" }}</p></td>
+    </tr>
+    <tr>
+        <td><h5>Time</h5></td>
+        <td><p>{{ event.date_time|time:"H:i" }}</p></td>
+    </tr>
+    <tr>
+        <td><h5>Location</h5></td>
+        <td><p>{{ event.location }}</p></td>
+    </tr>
+    <tr>
+        <td><h5>Province</h5></td>
+        <td><p>{{ event.province }} </p></td>
+    </tr>
+    <tr>
+        <td><h5>Description</h5></td>
+        <td>{{ event.description|safe }}</td>
+    </tr>
+    
+   </table>
+</div>
+<div class="container justify-content-center align-items-center text-center">
+    {% if request.user.is_authenticated %}
+        {% if user_attending %}
+            <a href="{% url 'user_attending' event_id=event.id %}" class="btn btn-primary" style="width: 200px;"><i class="bi bi-pin-map-fill"></i> I'm coming ( {{ event.attending }} )</a>
+        {% else %}
+            <a href="{% url 'user_attending' event_id=event.id %}" class="btn btn-outline-primary" style="width: 200px;"><i class="bi bi-pin-map"></i> I'm coming ( {{ event.attending }} )</a>
+        {% endif %}
+        {% if user_interested %}
+            <a href="{% url 'user_interested' event_id=event.id %}" class="btn btn-secondary" style="width: 200px;"><i class="bi bi-question-square-fill"></i> I'm interested ( {{ event.interested }} )</a>
+        {% else %}
+            <a href="{% url 'user_interested' event_id=event.id %}" class="btn btn-outline-secondary" style="width: 200px;"><i class="bi bi-question-lg"></i> I'm interested ( {{ event.interested }} )</a>
+        {% endif %}
+    {% endif %}
+</div>
+
+
+<script src="{% static 'lib/flipdown/flipdown.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+            const unixTimestamp = parseInt("{{ timestamp }}");
+            var flipdown = new FlipDown(unixTimestamp, {
+                theme: 'light'
+            })
+            .start()
+            .ifEnded(() => {
+                var flipdownDiv = document.getElementById('flipdown');
+                flipdownDiv.innerHTML = '<h1 class="text-white">Event has passed!</h1>';
+            });
+        });
+</script>
+<style>
+    .flipdown{
+        text-align: center;
+        justify-content: center;
+        align-items: center;;
+    }
+</style>
+{% endblock %} 

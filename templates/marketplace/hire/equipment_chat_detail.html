@@ -1,0 +1,122 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+
+    <h1> Conversation </h1>
+
+    <div class="messages-container">
+        {% for message in equipment_chat.equipment_chat_message.all %}
+            <div class="message {% if message.created_by == request.user %}sent{% else %}received{% endif %}">
+                <p class="meta-info">
+                    {{ message.created_by.username }} @ {{ message.created_at }}
+                </p>
+                <p class="content">{{ message.content }}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<div class="chat-form-container">
+    <form method="post" action="" class="chat-form">
+        {% csrf_token %}
+
+        <div class="form-group">
+            {{ form.as_p }}
+        </div>
+
+        <button class="btn-send">Reply</button>
+    </form>
+</div>
+<style>
+    h1 {
+        color: #333;
+        text-align: center;
+    }
+
+    .messages-container {
+        margin-bottom: 20px;
+        overflow-y: auto;
+        max-height: 300px;
+        border: 1px solid #ddd; /* Add a border around the messages container */
+        border-radius: 5px;
+        padding: 10px; /* Add some padding to the container */
+        background-image: url('{% static "images/farmers/chatbg.png" %}');
+    }
+
+    .message {
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        word-wrap: break-word;
+        clear: both;
+    }
+
+    .sent {
+        background-color: #116530;
+        color: #fff;
+        float: right;
+    }
+
+    .received {
+        background-color: #D3BD71;
+        color: #333;
+        float: left;
+    }
+
+    .meta-info {
+        font-size: 12px;
+        color: #888;
+        margin-bottom: 5px;
+    }
+
+    .content {
+        font-size: 16px;
+    }
+
+    .chat-form-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .chat-form {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .form-group {
+        flex-grow: 1;
+        margin-right: 10px;
+    }
+
+    .form-group textarea {
+        width: 80%;
+        height: 50px;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    .btn-send {
+        background-color: #116530;
+        height: 50px;
+        color: #fff;
+        padding: 10px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-send:hover {
+        background-color: #D3BD71;
+    }
+</style>
+
+{% endblock %}

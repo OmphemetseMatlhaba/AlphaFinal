@@ -1,0 +1,77 @@
+
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block content %}
+
+<header>
+    
+    <img src="{% static 'images\farmers\hero1.png' %}" alt="Banner Image Description">
+  </header>
+    <div class="container">
+        <h1>Manage Equipment Requests</h1>
+        {% if requests %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Equipment Name</th>
+                    <th>Category</th>
+                    <th>Image</th>
+                    <th>Price</th>
+                    <th>Description</th>
+                    <th>PDF Documentation</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for request in requests %}
+                <tr>
+                    <td>{{ request.name }}</td>
+                    <td>{{ request.category }}</td>
+                    <td><img src="{{ request.image.url }}" alt="Equipment Image" width="100"></td>
+                    <td>{{ request.price }}</td>
+                    <td>{{ request.description|safe }}</td>
+                    <td><a href="{{ request.pdf_document.url }}" target="_blank">PDF Documentation</a></td>
+                    <td>{{ request.status }}</td>
+                    <td>
+                        {% if request.status == 'PENDING' %}
+                            <a href="{% url 'item:accept_request' request.id %}">Accept</a> |
+                            <a href="{% url 'item:reject_request' request.id %}">Reject</a>
+                        {% else %}
+                            Status: {{ request.status }}
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No equipment requests found.</p>
+        {% endif %}
+    </div>
+
+    
+</div>
+
+<style>
+               
+    img {
+        max-width: 100%; /* Ensure the image doesn't exceed its container width */
+        height: auto; /* Maintain the image's aspect ratio */
+        border-radius: 8px; /* Add rounded corners to the image */
+    }
+
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    th, td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
+{% endblock %}

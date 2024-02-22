@@ -1,0 +1,52 @@
+<div class="col-lg-3 pt-4">
+    <div class="sticky-top">
+        <h3 class="text-center">Filter</h3>
+    <div class="accordion" id="accordionExample">
+        <div class="wizard">
+            <div class="list-group list-group-flush">
+                <a class="list-group-item {% if request.path == '/noticeboard/' %}active{% endif %}" href="{% url 'noticeboard' %}">View All <i class="bi bi-chevron-expand"></i></a>
+            </div>            
+        </div>
+        <div class="accordion-item">
+        <h2 class="accordion-header" id="headingOne">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+            Categories
+            </button>
+        </h2>
+        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                <div class="wizard">
+                    <div class="list-group list-group-flush">
+                        {% for category in categories %}
+                            <a class="list-group-item {% if category.id == selected_category_id %}active{% endif %}" href="{% url 'filter_category' category_id=category.id %}">{{ category.name }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingTwo">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+              Province
+            </button>
+          </h2>
+          <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                <div class="wizard">
+                    <div class="list-group list-group-flush">
+                        {% for province in unique_provinces %}
+                            <a class="list-group-item {% if province == location %}active{% endif %}" href="{% url 'filter_location' location=province %}">{{ province }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    {% if request.user.is_authenticated %}
+        <a class="list-group-item {% if '/view_user_events/' in request.path %}active{% endif %}" href="{% url 'user_events' %}">Your events <i class="bi bi-person"></i></a>
+    {% endif %}
+    <a class="list-group-item  {% if '/create_event/' in request.path %}active{% endif %}" href="{% url 'create_event' %}">Create new event <i class="bi bi-plus-lg"></i></a>    
+    </div>
+</div>

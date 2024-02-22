@@ -1,0 +1,388 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Alpha | {{ post.farmer.first_name }}'s post{% endblock %}
+{% load humanize %}
+{% block content %}
+
+<header>
+    <img src="{% static 'images\headers\1.png' %}" alt="Banner Image Description">
+  </header>
+
+<div class="container mt-5">
+    <div class="row">
+        {% include 'forum/forum_sidebar.html' %}
+        <div class="col-lg-8 pb-5">
+            {% include 'includes/alerts.html' %}
+            <div class="container-fluid mt-100">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card mb-4">
+                            <div class="box-header">
+                                <div class="user-block">
+                                    <a href="{{ post.farmer.profile.profile_picture.url }}" data-lightbox="user_profile">
+                                        <img class="rounded-circle" src="{{ post.farmer.profile.profile_picture.url }}" alt="User Image">
+                                    </a>
+                                    <span class="username"><a href="{% url 'visit_user' user_id=post.farmer.id %}">{{ post.farmer.first_name }} {{ post.farmer.last_name}}.</a></span>
+                                    <span class="description">{{ post.created_at|date:"j F Y @ g:i A" }}</span>
+                                </div>
+                                <div class="box-tools">
+                                    <span class="text-muted text-sm">Member since {{ post.farmer.date_joined|date:"j F Y" }}</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <h1>{{ post.title }} </h1>
+                                {{ sanitized_body|safe }}
+                                {% for tag in post.tags.all %}
+                                    <a href="{% url 'posts_by_tag' tag=tag %}" >#{{ tag.name }}</a>
+                                {% endfor %}
+                            </div>
+                            <div class="card-footer d-flex flex-wrap justify-content-between bg-white align-items-center px-0 pt-0 pb-3">
+                                <div class="px-4 pt-3"> 
+                                    <span class="text-muted d-inline-flex align-items-center align-middle"> 
+                                        <i class="bi bi-hand-thumbs-up text-secondary" style="font-size: 25px;"></i>&nbsp;
+                                        <span class="align-middle">{{ post.upvotes }} Upvotes</span> 
+                                    </span> &nbsp;&nbsp;
+                                    <span class="text-muted d-inline-flex align-items-center align-middle ml-4"> 
+                                        <i class="bi bi-hand-thumbs-down text-secondary" style="font-size: 25px;"></i>&nbsp; 
+                                        <span class="align-middle">{{ post.downvotes }} Downvotes</span> 
+                                    </span>&nbsp; &nbsp; 
+                                </div>
+                                <div class="px-4 pt-3"> 
+                                    {% if post.farmer.id == request.user.id %}
+                                        <button type="button" class="btn btn-outline-danger" onclick="delete_post('{{ post.id }}')"><i class="bi bi-trash3"></i>&nbsp; Delete</button>
+                                        <a role="button" class="btn btn-outline-primary" href="{% url 'edit_post' post_id=post.id %}"><i class="bi bi-pencil"></i>&nbsp; Edit</a>
+                                    {% else %}
+                                        {% if existing_comment %}
+                                            <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#commentModal"><i class="bi bi-pencil-square"></i>&nbsp; Edit</button>
+                                        {% else %}
+                                            <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#commentModal"><i class="bi bi-pencil-square"></i>&nbsp; Reply</button>
+                                        {% endif %}
+                                        {% if user_upvoted_post %}
+                                            <a href="{% url 'upvote_post' post_id=post.id %}" class="btn btn-success">
+                                                <i class="bi bi-hand-thumbs-up-fill"></i>&nbsp; Upvoted
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'upvote_post' post_id=post.id %}" class="btn btn-outline-success">
+                                                <i class="bi bi-hand-thumbs-up"></i>&nbsp; Upvote
+                                            </a>
+                                        {% endif %}
+                                        {% if user_downvoted_post %}
+                                            <a href="{% url 'downvote_post' post_id=post.id %}" class="btn btn-danger">
+                                                <i class="bi bi-hand-thumbs-down-fill"></i>&nbsp; Downvoted
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'downvote_post' post_id=post.id %}" class="btn btn-outline-danger">
+                                                <i class="bi bi-hand-thumbs-down"></i>&nbsp; Downvote
+                                            </a>   
+                                        {% endif %}
+                                    {% endif %}  
+                                </div>
+                            </div>
+                        </div>
+                        <h3>Comments ({{ total_comments }})</h3>    
+                        {% for comment in comments %}
+                        <!-- MAIN COMMENT  -->
+                        <div class="d-flex mb-0 {% if request.user.id == comment.farmer.id %}bg-light text-dark{% endif %}" style="border: none; border-spacing: 5px; padding: 15px;">
+                            <a href="{{ comment.farmer.profile.profile_picture.url }}" data-lightbox="user{{ comment.farmer.id }}">
+                                <img src="{{ comment.farmer.profile.profile_picture.url }}" class="img-fluid rounded-circle" style="width: 60px; height: 60px;">
+                            </a>
+                            <div class="ps-2" style="width: calc(100% - 60px);">
+                                <div style="margin-bottom: 5px; margin-top: 5px;">
+                                    <h5 style="margin-bottom: 0;"><a href="{% url 'visit_user' user_id=comment.farmer.id %}" class="link-primary text-decoration-none">
+                                        {% if request.user.id == comment.farmer.id %}
+                                            {{ comment.farmer.first_name }} {{ comment.farmer.last_name }} <span class="text-secondary">(You)</span> <a href="#" class="btn btn-danger" onclick="delete_comment('{{ comment.id }}')" style="float: right;"><i class="bi bi-trash3"></i>&nbsp; Delete</a>
+                                        {% else %}
+                                            {{ comment.farmer.first_name }} {{ comment.farmer.last_name }}
+                                        {% endif %}
+                                    </a></h5>
+                                    <small style="float: left;">Commented {{ comment.created_at|naturaltime }}</small>
+                                    <div style="clear: both;"></div>
+                                </div>
+                                <div class="container" style="max-width: 90%; overflow-wrap: break-word; margin-left: 0; padding-left: 6px; text-align: justify;">
+                                    {{ comment.body }}
+                                </div>
+                                <div style="float: right; bottom: 15px;">
+                                    {% if request.user == comment.farmer %}
+                                        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#commentModal"><i class="bi bi-pencil-square"></i>&nbsp; Edit comment</button>
+                                    {% else %}
+                                        {% if comment.id in upvoted_comments %}
+                                            <a href="{% url 'upvote_comment' comment_id=comment.id %}" class="btn btn-success"><i class="bi bi-hand-thumbs-up-fill"></i>&nbsp; {{ comment.upvotes }}</a>
+                                        {% else %}
+                                            <a href="{% url 'upvote_comment' comment_id=comment.id %}" class="btn btn-outline-success"><i class="bi bi-hand-thumbs-up"></i>&nbsp; {{ comment.upvotes }}</a> 
+                                        {% endif %}
+                                        {% if comment.id in downvoted_comments %}
+                                            <a href="{% url 'downvote_comment' comment_id=comment.id %}" class="btn btn-danger"><i class="bi bi-hand-thumbs-down-fill"></i>&nbsp; {{ comment.downvotes }}</a>
+                                        {% else %}
+                                            <a href="{% url 'downvote_comment' comment_id=comment.id %}" class="btn btn-outline-danger"><i class="bi bi-hand-thumbs-down"></i>&nbsp; {{ comment.downvotes }}</a>
+                                        {% endif %}
+                                        <button class="btn btn-primary" data-toggle="modal" data-target="#subcommentModal{{ comment.id }}"><i class="bi bi-reply"></i></button>  
+                                        <div class="modal fade" id="subcommentModal{{ comment.id }}" tabindex="-1" role="dialog" aria-labelledby="subcommentModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="subcommentModalLabel{{ comment.id }}">Respond to {{ comment.farmer.first_name }}</h5>
+                                                        <button type="button" class="close" data-dismiss="modal" style="border: none; background-color: white; width: 20px;" aria-label="Close">
+                                                            <span aria-hidden="true" class="text-primary" style="font-size: 30px;">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p class="text-muted mb-2">{{ comment.body }}</p>
+                                                        <form action="{% url 'subcomment_modal' comment_id=comment.id %}" method="post">
+                                                            {% csrf_token %}
+                                                            <textarea name="sub_comment_body" id="sub_comment_body" cols="30" rows="5" class="form-control mb-3 border-1"></textarea>
+                                                            <div class="text-center">
+                                                                <button type="submit" class="btn btn-primary">Submit</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %} 
+                                </div>
+                            </div>
+                        </div>
+                            {% for sub_comment in comment.replies.all %}
+                                <div class="d-flex ms-5 mb-0" style="border: none; border-spacing: 5px; padding: 15px;">
+                                    <a href="{{ sub_comment.farmer.profile.profile_picture.url }}" data-lightbox="sub{{sub_comment.farmer.id }}">
+                                        <img src="{{ sub_comment.farmer.profile.profile_picture.url }}" class="img-fluid rounded-circle" style="width: 60px; height: 60px;">
+                                    </a>
+                                    <div class="ps-2" style="width: calc(100% - 60px);">
+                                        <div style="margin-bottom: 5px; margin-top: 5px;">
+                                            <h5 style="margin-bottom: 0;"><a href="{% url 'visit_user' user_id=sub_comment.farmer.id %}">
+                                                {% if request.user.id == sub_comment.farmer.id %}
+                                                    {{ sub_comment.farmer.first_name }} {{ sub_comment.farmer.last_name }}. <span class="text-secondary">(You)</span> <a href="#" class="btn btn-danger" onclick="delete_sub_comment('{{ sub_comment.id }}')" style="float: right;"><i class="bi bi-trash3"></i>&nbsp; Delete</a>
+                                                {% else %}
+                                                    {{ sub_comment.farmer.first_name }} {{ sub_comment.farmer.last_name }}.
+                                                {% endif %}
+                                            </a></h5>
+                                            <small style="float: left;">Responded {{ sub_comment.created_at|naturaltime }}</small>
+                                            <div style="clear: both;"></div>
+                                        </div>
+                                        <div class="container" style="max-width: 90%; overflow-wrap: break-word; margin-left: 0; padding-left: 6px; text-align: justify;">
+                                            {{ sub_comment.response }}
+                                        </div>
+                                        <div style="float: right; bottom: 15px;">
+                                            <button class="btn btn-primary" data-toggle="modal" data-target="#subcommentModal{{ comment.id }}"><i class="bi bi-reply"></i> &nbsp;Reply</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal fade" id="subcommentModal{{ comment.id }}" tabindex="-1" role="dialog" aria-labelledby="subcommentModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="subcommentModalLabel{{ comment.id }}">Respond to {{ comment.farmer.first_name }}</h5>
+                                                <button type="button" class="close" data-dismiss="modal" style="border: none; background-color: white; width: 20px;" aria-label="Close">
+                                                    <span aria-hidden="true" class="text-primary" style="font-size: 30px;">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p class="text-muted mb-2">{{ comment.body }}</p>
+                                                <form action="{% url 'subcomment_modal' comment_id=comment.id %}" method="post">
+                                                    {% csrf_token %}
+                                                    <textarea name="sub_comment_body" id="sub_comment_body" cols="30" rows="5" class="form-control mb-3 border-1"></textarea>
+                                                    <div class="text-center">
+                                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            <hr style="height: 2px;">
+                        {% endfor %}                                            
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="commentModalLabel">Responding to {{ post.farmer.first_name }}'s post</h5>
+            <button type="button" class="close" data-dismiss="modal" style="border: none; background-color: white; width: 20px;" aria-label="Close">
+                <span aria-hidden="true" class="text-primary" style="font-size: 30px;">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-body">
+                <form action="{% url 'view_post' post_id=post.id %}" method="post">
+                    {% csrf_token %}
+                    <label for="post_body">Your Comment:</label>
+                    {{ com_form.body }}
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+
+
+<style>
+
+
+    img {
+        max-width: 100%; /* Ensure the image doesn't exceed its container width */
+        height: auto; /* Maintain the image's aspect ratio */
+        border-radius: 8px; /* Add rounded corners to the image */
+    }
+    
+
+
+    .box-header {
+        color: #444;
+        display: block;
+        padding: 10px;
+        position: relative;
+    }
+    .user-block img {
+        width: 60px;
+        height: 60px;
+        float: left;
+        margin-left: 10px;
+    }
+    .user-block .username {
+        font-size: 16px;
+        font-weight: 600;
+    }
+    .user-block .description {
+        color: #999;
+        font-size: 13px;
+    }
+    .user-block .username, 
+    .user-block .description, 
+    .user-block .comment {
+        display: block;
+        margin-left: 70px;
+    }
+    .box-header>.box-tools {
+        position: absolute;
+        right: 10px;
+        top: 15px;
+    }
+
+    @media (max-width: 767px) {
+        .box-tools {
+            display: none;
+        }
+    }
+    .innapropriate_modal {		
+        color: #636363;
+        width: 400px;
+    }
+    .innapropriate_modal .modal-content {
+        padding: 20px;
+        border-radius: 5px;
+        border: none;
+        text-align: center;
+        font-size: 14px;
+    }
+    .innapropriate_modal .modal-header {
+        border-bottom: none;   
+        position: relative;
+    }
+    .innapropriate_modal h4 {
+        text-align: center;
+        font-size: 26px;
+        margin: 30px 0 -10px;
+    }
+    .innapropriate_modal .close {
+        position: absolute;
+        top: -5px;
+        right: -2px;
+        color: #ee3535
+    }
+    .innapropriate_modal .modal-body {
+        color: #999;
+    }
+    .innapropriate_modal .modal-footer {
+        border: none;
+        text-align: center;		
+        border-radius: 5px;
+        font-size: 13px;
+        padding: 10px 15px 25px;
+    }
+    .innapropriate_modal .modal-footer a {
+        color: #999;
+    }		
+    .innapropriate_modal .icon-box {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto;
+        border-radius: 50%;
+        z-index: 9;
+        text-align: center;
+        border: 3px solid #CA2637;
+    }
+    .innapropriate_modal .icon-box i {
+        color: #CA2637;
+        font-size: 46px;
+        display: inline-block;
+        margin-top: 13px;
+    }
+    .innapropriate_modal .btn, .innapropriate_modal .btn:active {
+        color: #fff;
+        border-radius: 4px;
+        background: #60c7c1;
+        text-decoration: none;
+        transition: all 0.4s;
+        line-height: normal;
+        min-width: 120px;
+        border: none;
+        min-height: 40px;
+        border-radius: 3px;
+        margin: 0 5px;
+    }
+    .innapropriate_modal .btn-secondary {
+        background: #c1c1c1;
+    }
+    .innapropriate_modal .btn-secondary:hover, .innapropriate_modal .btn-secondary:focus {
+        background: #a8a8a8;
+    }
+    .innapropriate_modal .btn-danger {
+        background: #CA2637;
+    }
+    .innapropriate_modal .btn-danger:hover, .innapropriate_modal .btn-danger:focus {
+        background: #ee3535;
+    }
+    .trigger-btn {
+        display: inline-block;
+        margin: 100px auto;
+    }
+
+</style>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+<script>
+    function delete_post(post_id) {
+        var confirm_post_delete = confirm("Are you sure you want to delete your post? This cannot be reversed.");
+        if (confirm_post_delete){
+            window.location.href = "{% url 'delete_post' post_id=0 %}".replace('0', post_id);
+        }
+    }
+
+    function delete_comment(comment_id) {
+        var cofirm_comment_delete = confirm("Are you sure you want to delete your comment? This cannot be reversed.");
+        if (cofirm_comment_delete){
+            window.location.href = "{% url 'delete_comment' comment_id=0 %}".replace('0', comment_id);
+        }
+    }
+    function delete_sub_comment(subcomment_id){
+        var confirm_subcomment_delete = confirm("Are you sure you want to delete your response? This cannot be reversed.");
+        if (confirm_subcomment_delete){
+            window.location.href = "{% url 'delete_sub_comment' subcomment_id=0 %}".replace('0', subcomment_id)
+        }
+    }
+</script>
+
+{% endblock %}

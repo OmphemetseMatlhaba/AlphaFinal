@@ -1,0 +1,194 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block content %}
+
+<header>
+  <img src="{% static 'images/farmers/hero1.png' %}" alt="Banner Image Description">
+</header>
+
+<div class="container">
+    <div class="equipment-detail">
+        <img src="{{ equipment.image.url }}" alt="{{ equipment.name }}" class="equipment-image">
+        <div class="equipment-info">
+            <h1>{{ equipment.name }}</h1>
+            <p class="category">Category: {{ equipment.category }}</p>
+            <p class="price">Price: R{{ equipment.price }}</p>
+            <p class="description">Description: {{ equipment.description|safe }}</p>
+        </div>
+    </div>
+
+    <h1>Check Availability</h1>
+
+
+        <input type="hidden" name="equipment_price" value="{{ equipment.price }}">
+        <div class="form-group">
+            <label for="start-date">Start Date:</label>
+            <input type="date" id="start-date" name="start_date" class="form-control" value="{{ start_date }}">
+        </div>
+        <div class="form-group">
+            <label for="end-date">End Date:</label>
+            <input type="date" id="end-date" name="end_date" class="form-control" value="{{ end_date }}">
+        </div>
+
+
+   
+<div class="container">
+    <div class="summary">
+        <h2>Summary</h2>
+        <table>
+            <tr>
+                <th>Start Date</th>
+                <td></td>
+            </tr>
+            <tr>
+                <th>End Date</th>
+                <td></td>
+            </tr>
+            <tr>
+                <th>Number of Days</th>
+                <td></td>
+            </tr>
+            <tr>
+                <th>Total Calculated Cost</th>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+ 
+</div> 
+</div>
+
+<form method="POST" action="">
+
+    {% csrf_token %}
+
+    <input type="hidden" name="start_date" id="start_date"/>
+    <input type="hidden" name="end_date" id="end_date"/>
+    <input type="hidden" name="total_cost" id="total_cost"/>
+    <input type="hidden" name="total_days" id="total_days"/>
+
+    <button class="btn btn-outline-primary" type="submit" name="submit" id="submit">HIRE</button>
+
+
+
+</form>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#start-date, #end-date').on('change', function() {
+            var startDate = new Date($('#start-date').val());
+            var endDate = new Date($('#end-date').val());
+            var equipmentPrice = parseFloat($('input[name="equipment_price"]').val());
+            var daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+            var totalCost = daysDiff * equipmentPrice;
+
+            // Update hidden fields
+            $('#start_date').val($('#start-date').val());
+            $('#end_date').val($('#end-date').val());
+            $('#total_days').val(daysDiff);
+            $('#total_cost').val(totalCost.toFixed(2));
+
+            // Update summary table
+            $('.summary').find('td:eq(0)').text($('#start-date').val());
+            $('.summary').find('td:eq(1)').text($('#end-date').val());
+            $('.summary').find('td:eq(2)').text(daysDiff);
+            $('.summary').find('td:eq(3)').text('R' + totalCost.toFixed(2));
+        });
+    });
+</script>
+
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#start-date').attr('min', getCurrentDate()); // Set minimum start date to current date
+
+        $('#start-date').on('change', function() {
+            var startDate = new Date($(this).val());
+            var endDate = new Date($('#end-date').val());
+
+            // Check if end date is earlier than start date, if so, set end date to start date
+            if (endDate < startDate) {
+                $('#end-date').val($(this).val());
+            }
+        });
+
+        $('#end-date').on('change', function() {
+            var startDate = new Date($('#start-date').val());
+            var endDate = new Date($(this).val());
+
+            // Check if end date is earlier than start date, if so, set end date to start date
+            if (endDate < startDate) {
+                $('#end-date').val($('#start-date').val());
+            }
+        });
+
+        function getCurrentDate() {
+            var today = new Date();
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+            var yyyy = today.getFullYear();
+            return yyyy + '-' + mm + '-' + dd;
+        }
+    });
+</script>
+
+
+<style>
+  
+  img {
+        max-width: 100%; 
+        height: auto; 
+        border-radius: 8px; 
+    }
+
+  .equipment-detail {
+      display: flex;
+      align-items: justified;
+      margin-bottom: 20px;
+      margin-top: 15px;
+      
+  }
+
+  .equipment-image {
+      width: auto;
+      margin-right: 48px;
+      margin-top: 15px;
+  }
+
+  .equipment-info {
+      flex: 1;
+  }
+
+  .category, .price {
+      margin-top: 5px;
+      margin-bottom: 5px;
+      font-weight: bold;
+  }
+
+  .description {
+      margin-top: 10px;
+  }
+
+  .form-group {
+      margin-bottom: 15px;
+      width: 50%;
+  }
+
+  .btn-primary {
+      background-color: #116530;
+      border-color: #116530;
+  }
+
+  .btn-primary:hover {
+      background-color: #116530;
+      border-color: #116530;
+  }
+
+  .btn-primary:focus {
+      box-shadow: 0 0 0 0.2rem rgba(1, 69, 13, 0.5);
+  }
+
+</style>
+{% endblock %}

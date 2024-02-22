@@ -1,0 +1,218 @@
+{% extends 'marketplace/base.html' %}
+
+{% block content %}
+{% load static %}
+
+<header>
+    
+    <img src="{% static 'images\farmers\hero1.png' %}" alt="Banner Image Description">
+  </header>
+
+<div class="container">
+    <br>
+    <div class="row">
+        <div class="column"  style="background-color:#fcfcfc;" >
+            <h2>Make Hire Request for {{ hire_request.equipment.name }}</h2>
+            <br>
+            <p>Thank you for choosing AlphaHarvest to hire equipment with us. To ensure a smooth process, please ensure you have uploaded all required documents:</p>
+            <br><br>
+            <h1>Required Documents</h1>
+            <br>
+
+        <ul>
+            <li><strong>Signed PDF Contract:</strong> Please review and sign the contract provided. Ensure that all fields are completed accurately.</li>
+            <li><strong>Certified ID Copy:</strong> Upload a clear copy of your identification document, such as a passport or driver's license. The document must be current and valid.</li>
+            <li><strong>Proof Of Residence:</strong> Provide a document confirming your current address, such as a recent utility bill or official correspondence. Ensure it is dated within the last three months.</li>
+            <li><strong>Other Required Documents:</strong> Any additional documents specified by the hiring company or outlined in the terms of the agreement.</li>
+        </ul>
+        <br><br>
+        <p>Please ensure that all uploaded documents are clear, legible, and in the correct format (PDF preferred). Incomplete or illegible submissions may result in delays in processing your request.</p>
+        
+        <p>If you encounter any difficulties or have questions about the hiring process, feel free to reach out to our dedicated customer support team. We're here to assist you every step of the way.</p>
+        
+        <p>Thank you for your cooperation. We look forward to fulfilling your equipment hire needs!</p>
+        </div>
+
+    <div class="column"> 
+        <h2>Summary</h2>   
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Attribute</th>
+                <th scope="col">Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">Selected Equipment:</th>
+                <td>{{ hire_request.equipment.name }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Category:</th>
+                <td>{{ hire_request.equipment.category }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Price per day:</th>
+                <td>R{{ hire_request.equipment.price }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Start Date:</th>
+                <td>{{ hire_request.start_date|date:"j F Y" }}</td>
+            </tr>
+            <tr>
+                <th scope="row">End Date:</th>
+                <td>{{ hire_request.end_date|date:"j F Y"  }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Total Days:</th>
+                <td>{{ hire_request.total_days }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Total Cost:</th>
+                <td>R{{ hire_request.total_cost }}</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h2>Upload all required documents</h2>
+
+    <form  id="hire-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <table class="table">
+            <th> 
+            <div scope="col" class="upload-field">
+                <label for="id_pdf_contract" class="upload-label">PDF Contract:</label>
+                {{ form.pdf_contract.errors }}
+                <input type="file" name="pdf_contract" id="id_pdf_contract" class="upload-input">
+            </div>
+        </th>
+        
+        <th>
+            <div scope="col" class="upload-field">
+                <label for="id_pdf_idCopy" class="upload-label">PDF ID Copy:</label>
+                {{ form.pdf_idCopy.errors }}
+                <input type="file" name="pdf_idCopy" id="id_pdf_idCopy" class="upload-input">
+            </div>
+        </th>    
+
+        </table>
+        
+        <table class="table">
+            <th>
+            <div scope="col" class="upload-field">
+                <label for="id_pdf_proof_of_residence" class="upload-label">PDF Proof of Residence:</label>
+                {{ form.pdf_proof_of_residence.errors }}
+                <input type="file" name="pdf_proof_of_residence" id="id_pdf_proof_of_residence" class="upload-input">
+            </div>
+        </th>
+        
+            <th>
+            <div scope="col" class="upload-field">
+                <label for="id_pdf_other" class="upload-label">Other PDF:</label>
+                {{ form.pdf_other.errors }}
+                <input type="file" name="pdf_other" id="id_pdf_other" class="upload-input">
+            </div>
+            </th>
+            </table>
+            <br>
+  
+         <div class="form-group form-check">
+            
+            
+             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+               T&C
+              </button>
+              <input type="checkbox" class="form-check-input" id="agree-checkbox" required>
+             <label class="form-check-label" for="agree-checkbox">I agree to the terms and conditions</label>
+         </div>
+         <button id="submit-btn" type="submit" class="btn btn-primary" disabled>Submit Request</button>
+     </form>
+ </div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Alphaharvest Terms And Conditions</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <iframe src="{% static 'pdf/T&C.pdf' %}" width="100%" height="500px"></iframe>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<style>
+    #exampleModal iframe {
+        border: none;
+    }
+
+    img {
+        max-width: 100%; /* Ensure the image doesn't exceed its container width */
+        height: auto; /* Maintain the image's aspect ratio */
+        border-radius: 8px; /* Add rounded corners to the image */
+    }
+      
+      /* Custom CSS styles */
+.upload-field {
+    margin-bottom: 20px;
+}
+.upload-label {
+    font-weight: bold;
+}
+.upload-input {
+    display: block;
+    margin-top: 5px;
+}
+.error-message {
+    color: red;
+}
+
+.table{
+
+    width: 100%;
+    margin-left: auto;
+  margin-right: auto;
+  color:#116530
+ 
+}
+
+
+
+h2, h1{
+    text-align: center;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Create two equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 50%;
+  padding: 10px;
+  height: 900px; /* Should be removed. Only for demonstration */
+}
+
+
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const agreeCheckbox = document.getElementById('agree-checkbox');
+        const submitBtn = document.getElementById('submit-btn');
+
+        agreeCheckbox.addEventListener('change', function() {
+            submitBtn.disabled = !this.checked;
+        });
+    });
+</script>
+
+{% endblock %}

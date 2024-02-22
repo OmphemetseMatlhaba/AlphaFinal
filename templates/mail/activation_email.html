@@ -1,0 +1,9 @@
+{% load static %}
+{% autoescape off %} 
+    <h2>Greetings from AlphaHarvest.
+    Hi, {{ user.first_name }}. Lovely to have you join us. <br>
+    Please click on this <a href="http://{{ domain }}{% url 'activate' uidb64=uid token=token %}">link</a> to activate your account.
+    <br>
+    If you didn't request to create an account, please ignore this email</h2>
+    <h1 class="display-4 logo">AlphaHarvest</h1>
+{% endautoescape %}

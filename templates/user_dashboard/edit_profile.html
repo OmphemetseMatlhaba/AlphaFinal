@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Alpha | Edit Profile{% endblock %}
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row">  
+        {% include 'user_dashboard/dashboard_sidebar.html' %}
+        <div class="col-lg-8 pb-5">
+            {% include 'includes/alerts.html' %}
+            <form class="row" action="{% url 'edit_profile' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="col-md-12 text-center">
+                    <h4>Basic Account Info</h4>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <div class="form-floating mb-3">
+                            {{ basic_info.email }}
+                            <label style="color: black;" class="form-label">Email</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <div class="form-floating mb-3">
+                            {{ basic_info.first_name }}
+                            <label>First Name</label>
+                        </div>
+                        {% if basic_info.first_name.errors %}
+                        <div class="alert alert-danger">
+                                {% for error in basic_info.first_name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <div class="form-floating mb-3">
+                            {{ basic_info.last_name }}
+                            <label>Last Name</label>
+                        </div>
+                    </div>
+                    {% if basic_info.last_name.errors %}
+                        <div class="alert alert-danger">
+                                {% for error in basic_info.last_name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-12 text-center">
+                    <h4>Additional Account Information</h4>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <div class="form-floating mb-3">
+                            {{ additional_info.phone_number }}
+                            <label>Phone Number</label>
+                        </div>
+                        {% if additional_info.phone_number.errors %}
+                            <div class="alert alert-danger">
+                                {% for error in additional_info.phone_number.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <div class="form-floating mb-3">
+                            {{ additional_info.home_address }}
+                            <label>Home Address</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <div class="form-floating mb-3">
+                            {{ additional_info.suburb }}
+                            <label>Suburb</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <div class="form-floating mb-3">
+                            {{ additional_info.city }}
+                            <label>City</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <div class="form-floating mb-3">
+                            {{ additional_info.province }}
+                            <label>Province</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <div class="form-floating mb-3">
+                            {{ additional_info.postal_code }}
+                            <label>Postal Code</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <div class="form-floating mb-3">
+                            {{ additional_info.profile_picture }}
+                            <label>Profile Picture</label>
+                        </div>
+                        {% if additional_info.profile_picture.errors %}
+                            <div class="alert alert-danger">
+                                {% for error in additional_info.profile_picture.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <div class="form-check form-switch">
+                            {{ basic_info.profile_public }}
+                            <label class="form-check-label" for="flexSwitchCheckDefault">Profile Setting</label>
+                        </div>
+                        <p class="fw-lighter text-success">This is so that when you interact with the system, other users of the system will be able to see your information. <br>Your profile is currently set to  {% if request.user.profile_public == True %}public. Turn this off to set your profile to private.{% else %}private{% endif %}</p>
+                    </div>
+                </div>
+                <div class="col-md-12 text-center">
+                    <button type="submit" class="btn btn-secondary mx-auto" style="width: 20%;">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

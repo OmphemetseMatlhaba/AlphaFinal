@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Alpha | Past Air Quality{% endblock %}
+{% block content %}
+
+<header>
+    <img src="{% static 'images\headers\2.png' %}" alt="Banner Image Description">
+  </header>
+
+
+<div class="container">
+    <div class="col-md-12 text-center m-3">
+        <h4>Past Air Quality Data for {{ air_quality.city_name }}, {{ start_date }} to {{ end_date }}</h4>
+    </div>
+    <div class="row">
+        <form action="{% url 'past_air_quality' lon=longitude lat=latitude %}" method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col">
+                    <label for="">Choose the start date</label>
+                    <input type="date" name="start_date" id="start_date" value="{{ start_date }}" class="form-control">
+                </div>
+                <div class="col">
+                    <label for="">Choose the end date</label>
+                    <input type="date" name="end_date" id="end_date" value="{{ end_date }}" class="form-control">
+                </div>
+                <div class="col mx-auto d-grid">
+                    <button type="submit" class="btn btn-outline-primary mt-4">Apply filter</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-12 text-center m-3">
+        <h4>Air Quality Over Time</h4>
+        <div id="air_chart">
+        </div>
+    </div>
+    <div class="col-md-12 text-center m-3">
+        <h4>Element composition Over Time</h4>
+        <div id="element_chart">
+        </div>
+    </div>
+    <div class="col-md-12 text-center m-3">
+        <h4>Element composition Over Time</h4>
+        <div id="conc_chart">
+        </div>
+    </div>
+    <div class="col-md-12 text-center m-3">
+        <h4>Detailed Air Quality Breakdown</h4>
+    </div>
+    <div class="accordion" id="QualityAccordion">
+        {% for air in air_quality.data %}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
+                  {{ air.timestamp_local }}
+                </button>
+            </h2>
+            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#QualityAccordion">
+                <div class="accordion-body">
+                    <div class="row">
+                        <div class="col">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item">Concentration of Surface Sulfur Dioxide (SO2)<span style="float: right;">{{ air.so2 }} (µg/m³)</span></div>
+                                <div class="list-group-item">Concentration of Carbon Monoxide (O3)<span style="float: right;">{{ air.o3 }} (µg/m³)</span></div>
+                                <div class="list-group-item">Concentration of particulate matter < 2.5 microns<span style="float: right;">{{ air.pm25 }} (µg/m³)</span></div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item">Concentration of Surface Ozone (O3)<span style="float: right;">{{ air.o3 }} (µg/m³)</span></div>
+                                <div class="list-group-item">Concentration of Nitrogen Dioxide (NO2)<span style="float: right;">{{ air.no2 }} (µg/m³)</span></div>
+                                <div class="list-group-item">Concentration of particulate matter < 10 microns<span style="float: right;">{{ air.pm10 }} (µg/m³)</span></div>
+                            </div>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item">Air Quality Index<span style="float: right;">{{ air.aqi }}</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+     document.addEventListener('DOMContentLoaded', function () {
+        var today = new Date().toISOString().split('T')[0];
+
+        document.getElementById('start_date').setAttribute('max', today);
+        document.getElementById('end_date').setAttribute('max', today);
+
+        document.getElementById('start_date').addEventListener('input', function () {
+            var startDate = new Date(this.value);
+            
+            var endDateInput = document.getElementById('end_date');
+            if (startDate > new Date(endDateInput.value)) {
+                endDateInput.value = this.value;
+            }
+        });
+
+        document.getElementById('end_date').addEventListener('input', function () {
+            var endDate = new Date(this.value);
+
+            var startDateInput = document.getElementById('start_date');
+            if (endDate < new Date(startDateInput.value)) {
+                startDateInput.value = this.value;
+            }
+        });
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    const latitude = ('{{ latitude }}');
+    const longitude = ('{{ longitude }}');
+    const start_date = ('{{ start_date }}');
+    const end_date = ('{{ end_date }}');
+    var api_keys = 'a1aea166811f4436b42195f0b982052e';
+    var api_url = `https://api.weatherbit.io/v2.0/history/airquality?lat=${latitude}&lon=${longitude}&start_date=${start_date}&end_date=${end_date}&key=${api_keys}`;
+
+    const air_options = {
+        series: [
+            {
+                name: 'Air Quality Index',
+                data: [0,0,0,0,0,0]
+            }],
+            chart: {
+                type: 'area',
+                height: 450,
+                zoom: {
+                    enabled: true
+                }
+            },dataLabels: {
+                enabled: false
+            },
+            colors: ['#4e008e'], 
+    }
+    const air_chart = new ApexCharts(document.querySelector("#air_chart"), air_options)
+    air_chart.render();
+
+    const element_options = {
+        series: [
+            { 
+                name: 'Ozone (O3)', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                type: 'line',
+            },{ 
+                name: 'Sulfur Dioxide (SO2)',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },{ 
+                name: 'Nitrogen Dioxide (NO2)', 
+                data: [0, 0, 69, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },{ 
+                name: 'Carbon Monoxide (CO)', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },
+        ],
+        chart: {
+            height: 400,
+            type: 'line',
+            stacked: 'false',
+        },
+        xaxis : {
+            title:{
+                text: 'Dates'
+            }
+        },
+        yaxis : {
+            title: {
+                text: 'Element Composition'
+            },
+            min: 0
+        },
+        colors: ['#B7AC44', '#DF362D', '#FF8300', '#FF4500'],
+        stroke: {
+            width: [2, 2, 2],
+            curve: 'smooth',
+        }
+    };
+
+    const element_chart = new ApexCharts(document.querySelector("#element_chart"), element_options);
+    element_chart.render();
+
+    const conc_options = {
+        series: [
+            { 
+                name: ' Concentration of particulate matter < 2.5 microns (µg/m³)', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                type: 'line',
+            },{ 
+                name: 'Concentration of particulate matter < 10 microns (µg/m³)',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            }
+        ],
+        chart: {
+            height: 400,
+            type: 'line',
+            stacked: 'false',
+        },
+        xaxis : {
+            title:{
+                text: 'Dates'
+            }
+        },
+        yaxis : {
+            title: {
+                text: 'Concentration of matter'
+            },
+            min: 0
+        },
+        colors: ['#cf3042', '#30CFBD',],
+        stroke: {
+            width: [3, 3],
+            curve: 'smooth',
+        }
+    };
+
+    const conc_chart = new ApexCharts(document.querySelector("#conc_chart"), conc_options);
+    conc_chart.render();
+
+    function updateCharts(data){
+        const air_series = [
+            {
+                data: data.map(entry => ({ x: entry.timestamp_local, y: entry.aqi}))
+            }
+        ]
+        air_chart.updateSeries(air_series)
+
+        const element_series = [
+            {
+                data: data.map(entry => ({ x: entry.timestamp_local, y: entry.o3 }))
+            },{
+                data: data.map(entry => ({ x: entry.timestamp_local, y: entry.so2 }))
+            },{
+                data: data.map(entry => ({ x: entry.timestamp_local, y: entry.no2 }))
+            },{
+                data: data.map(entry => ({ x: entry.timestamp_local, y: entry.co }))
+            },
+        ]
+        element_chart.updateSeries(element_series)
+
+        const conc_series = [
+            {
+                data: data.map(entry => ({ x: entry.timestamp_local, y: entry.pm25 }))
+            },{
+                data: data.map(entry => ({ x: entry.timestamp_local, y: entry.pm10 }))
+            }
+        ]
+        conc_chart.updateSeries(conc_series)   
+    }
+    fetch(api_url)
+        .then(response => {
+            if(!response.ok){
+                console.log('Something went wrong')
+            }
+            return response.json()
+        })
+        .then(data => {
+            const data_response = data.data;
+            updateCharts(data_response)
+        })
+        .catch(error => {
+            console.log('Error', error)
+        })
+</script>
+
+<style>
+
+    img {
+        max-width: 100%; /* Ensure the image doesn't exceed its container width */
+        height: auto; /* Maintain the image's aspect ratio */
+        border-radius: 8px; /* Add rounded corners to the image */
+    }
+
+</style>
+
+{% endblock %}

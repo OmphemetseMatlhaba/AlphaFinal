@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<title>Add Emergency Contact</title>
+</head>
+
+<h1>Emergency Contacts</h1>
+<ul>
+    {% for contact in emergency_contacts %}
+        <li>{{ contact.name }} - {{ contact.phone_number }}</li>
+    {% endfor %}
+</ul>
+<a href="{% url 'add_emergency_contact' %}">Add Emergency Contact</a>
+
+{% endblock %}

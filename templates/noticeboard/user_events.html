@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Alpha | Your Events{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        {% include 'noticeboard/nb_sb.html' %}
+        <div class="col-lg-9 pt-4">
+            <h1 class="text-center">Your Posts</h1>
+            <div class="row">
+                {% if events %}
+                    {% for event in events %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card border-1">
+                                <div class="container">
+                                    <div class="card px-4 pt-4 pb-4 mx-auto inner-card">
+                                        <div class="d-flex align-items-center">
+                                            <img src="{{ event.farmer.profile.profile_picture.url }}" class="rounded-circle" style="width: 50px; height: 50px;">
+                                            <h5 class="ml-2">{{ event.farmer.first_name }} {{ event.farmer.last_name }}</h5>
+                                        </div>
+                                        <p class="mt-2"><i class="bi bi-clock"></i> &nbsp;{{ event.date_time|date:"j F Y"}}</p>
+                                        <p class=""><i class="bi bi-map"></i> &nbsp;{{ event.province }} </p>
+                                        <div class="d-flex justify-content-center align-items-center text-center" style="height: 100px;">
+                                            <h5 class="text-left">{{ event.name }}</h5>
+                                        </div>
+                                        <h6 class="badge badge-dark">{{ event.event_category.name }}</h6>
+                                        
+                                        <a href="{% url 'edit_event' event_id=event.id %}" class="btn btn-secondary mb-2"><span>Edit Event</span></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <nav class="mt-4 d-flex justify-content-center" aria-label="Page navigation sample">
+                        {% if events.has_other_pages %}
+                        <ul class="pagination">
+                            {% if events.has_previous %}
+                                <li class="page-item"><a class="page-link" href="?page={{ events.previous_page_number }}">Previous</a></li>
+                            {% else %}
+                                <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                            {% endif %}
+                            {% for i in events.paginator.page_range %}
+                                {% if events.number == i %}
+                                    <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                                {% else %}
+                                    <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                            {% if events.has_next %}
+                                <li class="page-item"><a class="page-link" href="?page={{ events.next_page_number }}">Next</a></li>
+                            {% else %}
+                                <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+                            {% endif %}
+                        </ul>
+                        {% endif %}
+                    </nav>
+                {% else %}
+                <div class="container-xxl h-100">
+                    <div class="container d-flex align-items-center justify-content-center text-center">
+                        <div class="row">
+                            <img src="{% static 'icons/desert.svg' %}" style="height: 350px;" alt="">
+                            <h3 class="display-1">Event 404</h3>
+                            <h3 class="mb-4">seems like you haven't created any events...</h3>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+    <style>
+        .card{
+            width: 300px;
+            border: none;
+            border-radius: 10px;
+        }
+        .inner-card{
+            border: 3px solid #eeeeee;   
+        }
+        @media (max-width: 992px) {
+            .card_carousel .owl-nav {
+                display: block;
+                position: relative;
+                top: 0;
+            }
+        }
+        @media screen and (max-width: 384px){
+            .card{
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                text-align: center;
+            }
+            .row{
+                text-align: center;
+                line-height: 3;
+                display: flex;
+                justify-content: center;
+            }
+            .ml-auto{
+                margin-left: 20px!important;
+            }
+        }
+        .card_carousel .owl-nav {
+            position: absolute;
+            top: -10%;
+            right: 0;
+        }
+
+        .card_carousel .owl-prev, .card_carousel .owl-next {
+            width: 40px;
+            height: 40px;
+            background: #ffffff;
+            border: 1px solid var(--secondary);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin: 0 5px;
+            font-size: 30px;
+            color: var(--secondary);
+        }
+
+        .list-group-item:hover i{
+            color: white;
+        }
+
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        filter: brightness(30%);
+        /* Adjust the blur value */
+    }
+
+    .content {
+        z-index: 1;
+        color: #ffffff;
+        padding: 20px;
+    }
+    </style>
+    <script>
+        function submitForm(){
+            document.getElementById("sortForm").submit();
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/503a66b4-2954-48e4-bc0c-aae6a8a1e40c/resourceGroups/AlphaHarvest-4/providers/Microsoft.Web/sites/AlphaHarvest-4",
+    "appService.deploySubpath": "."
+}

@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Alpha | Forum{% endblock %}
+{% block content %}
+
+<header>
+    <img src="{% static 'images\headers\1.png' %}" alt="Banner Image Description">
+  </header> 
+
+<div class="container mt-5">
+    <div class="row">
+        {% include 'forum/forum_sidebar.html' %}
+        <div class="col-lg-8 pb-5">
+            {% include 'includes/alerts.html' %}
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-6 text-start">
+                        <h1>AlphaForum</h1>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <a href="{% url 'create_post' %}" class="btn btn-secondary"><i class="fa fa-plus" style="padding-right: 5px;" aria-hidden="true"></i>Create new post</a>
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <div class="row">
+                    {% for category in categories %}
+                        <div class="col-xs-12 col-sm-6">
+                            <div class="forum-card">
+                                <div class="forum-card-background" style="background: url('{{ category.image.url }}') center center / cover; background-color: rgba(0, 0, 0, 0.3); filter: brightness(60%);"></div>
+                                <div class="overlay"></div>
+                                <div class="forum-card-category"><h2 class="text-white" style="font-size: 30px;">{{ category.name }}</h2></div>
+                                <div class="forum-card-description">
+                                    <span style="color: white;">{{ category.description }}</span> <br>
+                                    <a href="{% url 'sub_picker' category.id %}" class="forum-card-link">Read More <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<style>
+    .forum-card {
+        height: 300px;
+        background-size: cover !important;
+        color: white;
+        position: relative;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        transition: 0.3s ease-in-out;
+        overflow: hidden;
+    }
+
+    .forum-card-background {
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .overlay {
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .forum-card:hover .overlay {
+        opacity: 1;
+    }
+    .forum-card:hover .forum-card-background {
+        filter: blur(2px);
+    }
+
+    .forum-card:hover {
+        transform: scale(1.1);
+    }
+
+    .forum-card-category {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 20px;
+    }
+
+    .forum-card-description {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+    }
+
+    .forum-card-description h2 {
+        font-size: 17px;
+    }
+
+    .forum-card-description a {
+        font-size: 15px;
+    }
+
+
+
+    img {
+        max-width: 100%; /* Ensure the image doesn't exceed its container width */
+        height: auto; /* Maintain the image's aspect ratio */
+        border-radius: 8px; /* Add rounded corners to the image */
+    }
+
+
+
+   
+</style>
+
+{% endblock %}

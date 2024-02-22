@@ -1,0 +1,346 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Alpha | Daily Weather Forecast{% endblock %}
+{% block content %}
+
+<div class="container">
+    <div class="col-md-12 text-center m-3">
+        <h4>Future weather forecast for {{ future_data.city_name }}, for {{ days }} days</h4>
+    </div>
+    <div class="row">
+        <form action="{% url 'future_weather_daily' lat=latitude lon=longitude %}" method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col">
+                    <label for="">Choose the number of days (max - 16 days)</label>
+                    <input type="number" name="number_of_days" id="number_of_days" min="2" max="16" value="{{ days }}" class="form-control">
+                </div>
+                <div class="col-3 mx-auto d-grid">
+                    <button type="submit" class="btn btn-outline-primary mt-4">Apply filter</button>
+                </div>
+            </div>
+        </form>
+        <div class="col-md-12 text-center m-3">
+            <h4>Temperature</h4>
+            <div id="temp_chart"></div>
+        </div>
+        <div class="col-md-12 text-center m-3">
+            <h4>Wind</h4>
+            <div id="wind_chart"></div>
+        </div>
+        <div class="col-md-12 text-center m-3">
+            <h4>Precipitation</h4>
+            <div id="prec_chart"></div>
+        </div>
+        <div class="col-md-12 text-center m-3">
+            <h4>Atmosphere</h4>
+            <div id="atmo_chart"></div>
+        </div>
+        <div class="col-md-12 text-center m-3">
+            <h4>Detailed Forecast Breakdown</h4>
+        </div>
+        <div class="accordion" id="QualityAccordion">
+            {% for future in future_data.data %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
+                      {{ future.valid_date }}
+                    </button>
+                </h2>
+                <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#QualityAccordion">
+                    <div class="accordion-body">
+                        <div class="row">
+                            <div class="col">
+                                <div class="list-group list-group-flush">
+                                    <div class="list-group-item">Wind Gust Speed<span style="float: right;">{{ future.wind_gust_spd }} m/s</span></div>
+                                    <div class="list-group-item">Wind Speed<span style="float: right;">{{ future.wind_spd }} m/s</span></div>
+                                    <div class="list-group-item">Wind Direction<span style="float: right;">{{ future.wind_dir }} degrees</span></div>
+                                    <div class="list-group-item">Verbal Wind Direction<span style="float: right;">{{ future.wind_cdir_full }}</span></div>
+                                    <div class="list-group-item">Average Temperature<span style="float: right;">{{ future.temp }} °C</span></div>
+                                    <div class="list-group-item">Maximum Temperature<span style="float: right;">{{ future.max_temp }} °C</span></div>
+                                    <div class="list-group-item">Minimum Temperature<span style="float: right;">{{ future.min_temp }} °C</span></div>
+                                    <div class="list-group-item">High Temperature<span style="float: right;">{{ future.high_temp }} °C</span></div>
+                                    <div class="list-group-item">Low Temperature<span style="float: right;">{{ future.low_temp }} °C</span></div>
+                                    <div class="list-group-item">Apparent/Feels Like Max Temperature<span style="float: right;">{{ future.app_max_temp }} °C</span></div>
+                                    <div class="list-group-item">Apparent/Feels Like Min Temperature<span style="float: right;">{{ future.app_min_temp }} °C</span></div>
+                                    <div class="list-group-item">Probability of Precipitation<span style="float: right;">{{ future.pop }}%</span></div>
+                                    <div class="list-group-item">Accumulated Precipitation<span style="float: right;">{{ future.precip }} mm</span></div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="list-group list-group-flush">
+                                    <div class="list-group-item">Accumulated Snowfall<span style="float: right;">{{ future.snow }} mm</span></div>
+                                    <div class="list-group-item">Snow Depth<span style="float: right;">{{ future.snow_depth }} mm</span></div>
+                                    <div class="list-group-item">Average Pressure<span style="float: right;">{{ future.pres }} mb</span></div>
+                                    <div class="list-group-item">Average Sea Level Pressure<span style="float: right;">{{ future.slp }} mb</span></div>
+                                    <div class="list-group-item">Average Dew Point<span style="float: right;">{{ future.dewpt }} °C</span></div>
+                                    <div class="list-group-item">Average Relative Humidity<span style="float: right;">{{ future.rh }}%</span></div>
+                                    <div class="list-group-item">Low-level Cloud Coverage<span style="float: right;">{{ future.clouds_low }}%</span></div>
+                                    <div class="list-group-item">Mid-level Cloud Coverage<span style="float: right;">{{ future.clouds_mid }}%</span></div>
+                                    <div class="list-group-item">High-level Cloud Coverage<span style="float: right;">{{ future.clouds_hi }}%</span></div>
+                                    <div class="list-group-item">Average Total Cloud Coverage<span style="float: right;">{{ future.clouds }}%</span></div>
+                                    <div class="list-group-item">Visibility<span style="float: right;">{{ future.vis }} KM</span></div>
+                                    <div class="list-group-item">Maximum UV Index<span style="float: right;">{{ future.uv }}</span></div>
+                                    <div class="list-group-item">Average Ozone<span style="float: right;">{{ future.ozone }} Dobson units</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    const latitude = ('{{ latitude }}');
+    const longitude = ('{{ longitude }}');
+    const day = ('{{ days }}');
+    const api_keys = 'a1aea166811f4436b42195f0b982052e';
+    var api_url = `https://api.weatherbit.io/v2.0/forecast/daily?lat=${latitude}&lon=${longitude}&key=${api_keys}&days=${day}`;
+
+    const temperature_options = {
+        series: [
+            { 
+                name: 'Max Temperature', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                type: 'line',
+            },{ 
+                name: 'Min Temperature',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },{ 
+                name: 'Average Temperature', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },
+        ],
+        chart: {
+            height: 400,
+            type: 'line',
+            stacked: 'false',
+        },
+        xaxis : {
+            title:{
+                text: 'Dates'
+            }
+        },
+        yaxis : {
+            title: {
+                text: 'Temperature (°C)'
+            },
+            min: 0
+        },
+        colors: ['#FFAEBC', '#AOE7E5', '#B4F8C8'],
+        stroke: {
+            width: [3, 3, 3],
+            curve: 'smooth',
+        }
+    };
+
+    const temp_chart = new ApexCharts(document.querySelector("#temp_chart"), temperature_options);
+    temp_chart.render();
+
+    const wind_options = {
+        series: [
+            { 
+                name: 'Wind Gust Speed', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                type: 'line',
+            },{ 
+                name: 'Wind Speed',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            }
+        ],
+        chart: {
+            height: 400,
+            type: 'line',
+            stacked: 'false',
+        },
+        xaxis : {
+            title:{
+                text: 'Dates'
+            }
+        },
+        yaxis : {
+            title: {
+                text: 'Wind Speed (m/s)'
+            },
+            min: 0
+        },
+        colors: ['#F86F15', '#DEB3AD'],
+        stroke: {
+            width: [3, 3],
+            curve: 'smooth',
+        }
+    };
+
+    const wind_chart = new ApexCharts(document.querySelector("#wind_chart"), wind_options);
+    wind_chart.render();
+
+    const prec_options = {
+        series : [
+            {
+                name: 'Probability of precipitation (%)',
+                type: 'line',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                dataLabels: {
+                    enabled: false
+                }
+            },{
+                name: 'Precipitation (mm)',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'bar',
+            },{
+                name: 'Snow (mm)',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'bar',
+            }
+        ],
+        chart: {
+            type: 'bar',
+            height: 400,
+            stacked: true,
+            toolbar: {
+                show: true
+            },
+            zoom: {
+                enabled: true
+            }, 
+        },
+        responsive: [{
+          breakpoint: 480,
+          options: {
+            legend: {
+              position: 'bottom',
+              offsetX: -10,
+              offsetY: 0
+            }
+          }
+        }],
+        xaxis : {
+            title:{
+                text: 'Dates'
+            }
+        },
+        yaxis : {
+            title: {
+                text: 'Precipitation (mm)'
+            },
+            min: 0
+        },
+        colors: ['#07DAC0', '#D6DFE0', '#CE2380'],
+        stroke: {
+            width: [3, 3, 3],
+            curve: 'smooth',
+        },
+    }
+    const prec_chart = new ApexCharts(document.querySelector("#prec_chart"), prec_options);
+    prec_chart.render();
+
+    const atmo_options = {
+        series: [
+            { 
+                name: 'Pressure (mb)', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                type: 'area',
+            },{ 
+                name: 'Sea level Pressure (mb)', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                type: 'area',
+            },{ 
+                name: 'Average Dew Point (°C)',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                type: 'line',
+            }
+        ],
+        chart: {
+            height: 400,
+            type: 'line',
+            stacked: 'false',
+        },
+        xaxis : {
+            title:{
+                text: 'Dates'
+            }
+        },
+        yaxis : {
+            title: {
+                text: 'Wind Speed (m/s)'
+            },
+            min: 0
+        },
+        colors: ['#715B5B', '#A47C7A', '#0F1110'],
+        stroke: {
+            width: [3, 3, 4],
+            curve: 'smooth',
+        }
+    };
+
+    const atmo_chart = new ApexCharts(document.querySelector("#atmo_chart"), atmo_options);
+    atmo_chart.render();
+
+    function updateCharts(data) {
+        const temp_series = [
+            {
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.max_temp}))
+            },{
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.min_temp}))
+            },{
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.temp}))
+            },      
+        ];
+        temp_chart.updateSeries(temp_series)
+
+        const wind_series = [
+            {
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.wind_gust_spd }))
+            },{
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.wind_spd }))
+            }
+        ]
+        wind_chart.updateSeries(wind_series)
+
+        const prec_series = [
+            {
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.pop }))
+            },{
+                data: data.map(entry => ({ x: entry.valid_date, y: (entry.precip).toFixed(2) }))
+            },{
+                data: data.map(entry => ({ x: entry.valid_date, y: (entry.snow).toFixed(2) }))
+            },      
+        ];
+        prec_chart.updateSeries(prec_series)
+
+        const atmo_series = [
+            {
+                data: data.map(entry => ({ x: entry.valid_date, y: (entry.pres / 1000).toFixed(2) }))
+            },{
+                data: data.map(entry => ({ x: entry.valid_date, y: (entry.slp / 1000).toFixed(2) }))
+            },{
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.dewpt }))
+            },      
+        ];
+        atmo_chart.updateSeries(atmo_series)
+    }
+
+    fetch(api_url)
+        .then(response => {
+            if(!response.ok){
+                console.log('Something went wrong')
+            }
+            return response.json()
+        })
+        .then(data => {
+            const data_response = data.data;
+            updateCharts(data_response)
+        })
+        .catch(error => {
+            console.log('Error', error)
+        })
+
+</script>
+{% endblock %}

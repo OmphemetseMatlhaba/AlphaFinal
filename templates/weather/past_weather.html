@@ -1,0 +1,448 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Alpha | Past Daily Weather{% endblock %}
+{% block content %}
+
+<header>
+    <img src="{% static 'images\headers\2.png' %}" alt="Banner Image Description">
+  </header>
+
+
+<div class="container">
+    <div class="col-md-12 text-center m-3">
+        <h4>Past weather data for {{ past_data.city_name }}, {{ start_date }} to {{ end_date }}</h4>
+    </div>
+    <div class="row">
+        <form action="{% url 'past_weather_data' lon=longitude lat=latitude %}" method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col">
+                    <label for="">Choose the start date</label>
+                    <input type="date" name="start_date" id="start_date" value="{{ start_date }}" class="form-control">
+                </div>
+                <div class="col">
+                    <label for="">Choose the end date</label>
+                    <input type="date" name="end_date" id="end_date" value="{{ end_date }}" class="form-control">
+                </div>
+                <div class="col mx-auto d-grid">
+                    <button type="submit" class="btn btn-outline-primary mt-4">Apply filter</button>
+                </div>
+            </div>
+        </form>
+        <div class="col-md-12 text-center m-3">
+            <h4>Temperature</h4>
+            <div class="" id="temperature_chart"></div>
+        </div>
+        <div class="col-md-12 text-center m-3">
+            <h4>Wind</h4>
+            <div class="" id="wind_chart"></div>
+        </div>
+        <div class="col-md-12 text-center m-3">
+            <h4>Solar Radiation</h4>
+            <div class="" id="solar_chart"></div>
+        </div>
+        <div class="col-md-12 text-center m-3">
+            <h4>Precipitation</h4>
+            <div class="" id="precipitation_chart"></div>
+        </div>
+        <div class="col-md-12 text-center m-3">
+            <h4>Humidity and Dew Point</h4>
+            <div class="" id="humidity_chart"></div>
+        </div>
+
+        <div class="col-md-12 text-center m-3">
+            <h4>Detailed Past Weather Breakdown</h4>
+            <div id="air_chart"></div>
+        </div>
+        <div class="accordion" id="PastAccordion">
+            {% for past in past_data.data %}
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
+                  {{ past.datetime }}
+                </button>
+              </h2>
+              <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#PastAccordion">
+                <div class="accordion-body">
+                  <div class="row">
+                    <div class="col">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item">Average Sea Level Pressure<span style="float: right;">{{ past.slp }} mb</span></div>
+                            <div class="list-group-item">Average Wind Speed<span style="float: right;">{{ past.wind_spd }} m/s</span></div>
+                            <div class="list-group-item">Wind Gust Speed<span style="float: right;">{{ past.wind_gust_spd }} m/s</span></div>
+                            <div class="list-group-item">Maximum Wind Speed<span style="float: right;">{{ past.max_wind_spd }} m/s</span></div>
+                            <div class="list-group-item">Average Wind Direction<span style="float: right;">{{ past.wind_dir }} &deg;</span></div>
+                            <div class="list-group-item">Direction of Maximum Wind Gust<span style="float: right;">{{ past.max_wind_dir }} &deg;</span></div>
+                            <div class="list-group-item">Accumulated Snowfall<span style="float: right;">{{ past.snow }} mm</span></div>
+                            <div class="list-group-item">Average Temperature<span style="float: right;">{{ past.temp }} &deg;C</span></div>
+                            <div class="list-group-item">Maximum Temperature<span style="float: right;">{{ past.max_temp }} &deg;C</span></div>
+                            <div class="list-group-item">Minimum Temperature<span style="float: right;">{{ past.min_temp }} &deg;C</span></div>
+                            <div class="list-group-item">Average Relative Humidity<span style="float: right;">{{ past.rh }}%</span></div>
+                            <div class="list-group-item">Average Dew Point<span style="float: right;">{{ past.dewpt }} &deg;C</span></div>
+                            <div class="list-group-item">Average Cloud Coverage<span style="float: right;">{{ past.clouds }}%</span></div>
+                            <div class="list-group-item">Accumulated Precipitation<span style="float: right;">{{ past.precip }} mm</span></div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item">Snow Depth<span style="float: right;">{{ past.snow_depth }} mm</span></div>
+                            <div class="list-group-item">Average Solar Radiation<span style="float: right;">{{ past.solar_rad }} W/m^2</span></div>
+                            <div class="list-group-item">Total Solar Radiation<span style="float: right;">{{ past.t_solar_rad }} W/m^2</span></div>
+                            <div class="list-group-item">Average Global Horizontal Solar Irradiance<span style="float: right;">{{ past.ghi }} W/m^2</span></div>
+                            <div class="list-group-item">Day Total Global Horizontal Solar Irradiance<span style="float: right;">{{ past.t_ghi }} W/m^2 [Clear Sky]</span></div>
+                            <div class="list-group-item">Maximum Global Horizontal Solar Irradiance<span style="float: right;">{{ past.max_ghi }} W/m^2 [Clear Sky]</span></div>
+                            <div class="list-group-item">Average Direct Normal Solar Irradiance<span style="float: right;">{{ past.dni }} W/m^2 [Clear Sky]</span></div>
+                            <div class="list-group-item">Day Total Direct Normal Solar Irradiance<span style="float: right;">{{ past.t_dni }} W/m^2 [Clear Sky]</span></div>
+                            <div class="list-group-item">Maximum Direct Normal Solar Irradiance<span style="float: right;">{{ past.max_dni }} W/m^2 [Clear Sky]</span></div>
+                            <div class="list-group-item">Average Diffuse Horizontal Solar Irradiance<span style="float: right;">{{ past.dhi }} W/m^2 [Clear Sky]</span></div>
+                            <div class="list-group-item">Day Total Diffuse Horizontal Solar Irradiance<span style="float: right;">{{ past.t_dhi }} W/m^2 [Clear Sky]</span></div>
+                            <div class="list-group-item">Maximum Diffuse Horizontal Solar Irradiance<span style="float: right;">{{ past.max_dhi }} W/m^2 [Clear Sky]</span></div>
+                            <div class="list-group-item">Maximum UV Index<span style="float: right;">{{ past.max_uv }}</span></div>
+                            <div class="list-group-item">Accumulated Precipitation [Satellite/Radar Estimated]<span style="float: right;">{{ past.precip_gpm }} mm</span></div>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    
+</div>
+<input type="hidden" name="lat" id="lat" value="{{ latitude }}">
+<input type="hidden" name="lon" id="lon" value="{{ longitude }}">
+<input type="hidden" name="past_data" id="past_data" value="{{ past_data.data|safe }}">
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var today = new Date().toISOString().split('T')[0];
+
+        document.getElementById('start_date').setAttribute('max', today);
+        document.getElementById('end_date').setAttribute('max', today);
+
+        document.getElementById('start_date').addEventListener('input', function () {
+            var startDate = new Date(this.value);
+            
+            var endDateInput = document.getElementById('end_date');
+            if (startDate > new Date(endDateInput.value)) {
+                endDateInput.value = this.value;
+            }
+        });
+
+        document.getElementById('end_date').addEventListener('input', function () {
+            var endDate = new Date(this.value);
+
+            var startDateInput = document.getElementById('start_date');
+            if (endDate < new Date(startDateInput.value)) {
+                startDateInput.value = this.value;
+            }
+        });
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    const latitude_input = document.getElementById('lat');
+    const latitude = latitude_input.value;
+    const longitude_input = document.getElementById('lon');
+    const longitude = latitude_input.value;
+    const start_date = ('{{ start_date }}');
+    const end_date = ('{{ end_date }}');
+    var api_keys = 'a1aea166811f4436b42195f0b982052e';
+    var api_url = `https://api.weatherbit.io/v2.0/history/daily?lat=${latitude}&lon=${longitude}&start_date=${start_date}&end_date=${end_date}&key=${api_keys}`;
+    const temperature_options = {
+        series: [
+            { 
+                name: 'Max Temperature', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                type: 'line',
+            },{ 
+                name: 'Min Temperature',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },{ 
+                name: 'Average Temperature', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0],
+                type: 'line',
+            },
+        ],
+        chart: {
+            height: 400,
+            type: 'line',
+            stacked: 'false',
+        },
+        xaxis : {
+            title:{
+                text: 'Dates'
+            }
+        },
+        yaxis : {
+            title: {
+                text: 'Temperature (°C)'
+            },
+            min: 0
+        },
+        colors: ['#FFAEBC', '#AOE7E5', '#B4F8C8'],
+        stroke: {
+            width: [2, 2, 2],
+            curve: 'smooth',
+        }
+    };
+
+    const temp_chart = new ApexCharts(document.querySelector("#temperature_chart"), temperature_options);
+    temp_chart.render();
+
+    const wind_options = {
+        series: [
+            { 
+                name: 'Average Wind Speed', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                type: 'line',
+            },{ 
+                name: 'Wind Gust Speed',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },{ 
+                name: 'Nax Wind Speed', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },
+        ],
+        chart: {
+            height: 400,
+            type: 'line',
+            stacked: 'false',
+        },
+        xaxis : {
+            title:{
+                text: 'Dates'
+            }
+        },
+        yaxis : {
+            title: {
+                text: 'Wind (m/s)'
+            },
+            min: 0
+        },
+        colors: ['#FBE7C6', '#FFAEBC', '#A0E7E5'],
+        stroke: {
+            width: [2, 2, 2],
+            curve: 'smooth',
+        }
+    };
+
+    const wind_chart = new ApexCharts(document.querySelector("#wind_chart"), wind_options);
+    wind_chart.render();
+
+    const solar_options = {
+        series: [
+            { 
+                name: 'Average Solar Radiation', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                type: 'line',
+            },{ 
+                name: 'Total Solar Radiation',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },{ 
+                name: 'Global Horizontal Solar Irradiance', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },
+        ],
+        chart: {
+            height: 400,
+            type: 'line',
+            stacked: 'false',
+        },
+        xaxis : {
+            title:{
+                text: 'Dates'
+            }
+        },
+        yaxis : {
+            title: {
+                text: 'Solar Radiation (W/M^2)'
+            },
+            min: 0
+        },
+        colors: ['#FFCE66', '#44455B', '#F9AB40'],
+        stroke: {
+            width: [2, 2, 2],
+            curve: 'smooth',
+        }
+    };
+
+    const solar_chart = new ApexCharts(document.querySelector("#solar_chart"), solar_options);
+    solar_chart.render();
+
+    const precip_options = {
+        series: [
+            { 
+                name: 'Accumulated Precipitation', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                type: 'line',
+            },{ 
+                name: 'Precipitation Estimate',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },{ 
+                name: 'Snowfall', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },
+        ],
+        chart: {
+            height: 400,
+            type: 'line',
+            stacked: 'false',
+        },
+        xaxis : {
+            title:{
+                text: 'Dates'
+            }
+        },
+        yaxis : {
+            title: {
+                text: 'Precipitation (mm)'
+            },
+            min: 0
+        },
+        colors: ['#D3BBDD', '#BC96CA', '#F0F7E0'],
+        stroke: {
+            width: [2, 2, 2],
+            curve: 'smooth',
+        }
+    };
+
+    const precip_chart = new ApexCharts(document.querySelector("#precipitation_chart"), precip_options);
+    precip_chart.render();
+
+    const humid_options = {
+        series: [
+            { 
+                name: 'Average Relative Humidity', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                type: 'line',
+            },{ 
+                name: 'Average Dew Point',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },{ 
+                name: 'Cloud Coverage', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },
+        ],
+        chart: {
+            height: 400,
+            type: 'line',
+            stacked: 'false',
+        },
+        xaxis : {
+            title:{
+                text: 'Dates'
+            }
+        },
+        yaxis : {
+            title: {
+                text: 'Precipitation (mm)'
+            },
+            min: 0
+        },
+        colors: ['#1C6709', '#CC088A', '#AEE804'],
+        stroke: {
+            width: [2, 2, 2],
+            curve: 'smooth',
+        }
+    };
+
+    const humid_chart = new ApexCharts(document.querySelector("#humidity_chart"), humid_options);
+    humid_chart.render();
+
+    function updateCharts(data){
+        const temp_series = [
+            {
+                data: data.map(entry => ({ x: entry.datetime, y: entry.max_temp}))
+            },{
+                data: data.map(entry => ({ x: entry.datetime, y: entry.min_temp}))
+            },{
+                data: data.map(entry => ({ x: entry.datetime, y: entry.temp}))
+            }
+        ]
+        temp_chart.updateSeries(temp_series)
+
+        const wind_series = [
+            {
+                data: data.map(entry => ({ x: entry.datetime, y: entry.wind_spd}))
+            },{
+                data: data.map(entry => ({ x: entry.datetime, y: entry.wind_gust_spd}))
+            },{
+                data: data.map(entry => ({ x: entry.datetime, y: entry.temp}))
+            }
+        ]
+        wind_chart.updateSeries(wind_series)
+
+        const solar_series = [
+            {
+                data: data.map(entry => ({ x: entry.datetime, y: entry.solar_rad}))
+            },{
+                data: data.map(entry => ({ x: entry.datetime, y: entry.t_solar_rad}))
+            },{
+                data: data.map(entry => ({ x: entry.datetime, y: entry.ghi}))
+            }
+        ]
+        solar_chart.updateSeries(solar_series)
+
+        const precip_series = [
+            {
+                data: data.map(entry => ({ x: entry.datetime, y: entry.precip}))
+            },{
+                data: data.map(entry => ({ x: entry.datetime, y: entry.precip_gpm}))
+            },{
+                data: data.map(entry => ({ x: entry.datetime, y: entry.snow}))
+            }
+        ]
+        precip_chart.updateSeries(precip_series)
+
+        const humid_series = [
+            {
+                data: data.map(entry => ({ x: entry.datetime, y: entry.rh}))
+            },{
+                data: data.map(entry => ({ x: entry.datetime, y: entry.dewpt}))
+            },{
+                data: data.map(entry => ({ x: entry.datetime, y: entry.clouds}))
+            }
+        ]
+        humid_chart.updateSeries(humid_series)
+    };
+
+    fetch(api_url)
+        .then(response => {
+            if(!response.ok){
+                console.log('Something went wrong')
+            }
+            return response.json()
+        })
+        .then(data => {
+            const data_response = data.data;
+            updateCharts(data_response)
+        })
+        .catch(error => {
+            console.log('Error', error)
+        })
+</script>
+
+<style>
+
+    img {
+        max-width: 100%; /* Ensure the image doesn't exceed its container width */
+        height: auto; /* Maintain the image's aspect ratio */
+        border-radius: 8px; /* Add rounded corners to the image */
+    }
+
+</style>
+
+{% endblock %}

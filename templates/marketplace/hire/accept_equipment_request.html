@@ -1,0 +1,44 @@
+
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block content %}
+
+<header>
+    
+    <img src="{% static 'images\farmers\hero1.png' %}" alt="Banner Image Description">
+  </header>
+
+    <h1>Add Equipment Request</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="name">Equipment Name:</label><br>
+        <input type="text" id="name" name="name"><br>
+        <label for="category">Category:</label><br>
+        <select id="category" name="category">
+            {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+        </select><br>
+        <label for="image">Image:</label><br>
+        <input type="file" id="image" name="image"><br>
+        <label for="price">Price:</label><br>
+        <input type="number" id="price" name="price"><br>
+        <label for="description">Description:</label><br>
+        <textarea id="description" name="description"></textarea><br>
+        <label for="pdf_document">PDF Documentation:</label><br>
+        <input type="file" id="pdf_document" name="pdf_document"><br>
+        <input type="submit" value="Submit">
+    </form>
+
+    <style>
+               
+                  
+
+        img {
+            max-width: 100%; /* Ensure the image doesn't exceed its container width */
+            height: auto; /* Maintain the image's aspect ratio */
+            border-radius: 8px; /* Add rounded corners to the image */
+        }
+</style>
+
+    {% endblock %}

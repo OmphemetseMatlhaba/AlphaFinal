@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Alpha | Edit Event{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        {% include 'noticeboard/nb_sb.html' %}
+        <div class="col-lg-8 pt-4">
+            <h3 class="text-center">Edit Event</h3>
+            {% include 'includes/alerts.html' %}
+            <button class="btn btn-outline-danger btn-block" onclick="delete_event('{{ event.id }}')">Delete Event <i class="bi bi-trash"></i></button>
+            <form action="{% url 'edit_event' event_id=event.id %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <p>
+                    <label for="">Event Name</label>
+                    {{ form.name }}
+                </p>
+                <p>
+                    <label for="floatingInput">Event Date & Time</label>
+                    <input type="datetime-local" class="form-control" name="date_time" id="date_time" value='{{ event.date_time|date:"Y-m-d" }}T{{ event.date_time|date:"H:i" }}'>
+                </p>
+                <p>
+                    <label for="">Event Description</label>
+                    {{ form.description }}  
+                </p>
+                <p>
+                    <label for="">Event Location</label>
+                    {{ form.location }}
+                </p>
+                <p>
+                    <label for="">Event Province</label>
+                    {{ form.province }}
+                </p>
+                <p>
+                    <label for="">Event Category</label>
+                    {{ form.event_category }}
+                </p>
+                <p>
+                    <label for="">Event Poster (if applicable)</label>
+                    {{ form.image_cover }}
+                </p>
+                {{ form.media }}
+                <div class="col-md-12 text-center">
+                  <button type="submit" class="btn btn-secondary">Create Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<style>
+    .django-ckeditor-widget {
+        width: 100%;
+    }
+</style>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAbrH17xrTrz1QzXIbJIi47F4jX234p8QU&libraries=places&callback=initAutocomplete" async defer></script>
+<script>
+      function initAutocomplete() {
+        var options = {
+            componentRestrictions: { country: 'ZA' }
+        };
+
+        var autocomplete = new google.maps.places.Autocomplete(document.getElementById('address_input'), options);
+
+        autocomplete.addListener('place_changed', function () {
+            var place = autocomplete.getPlace();
+            if (place.geometry) {
+                var placesService = new google.maps.places.PlacesService(document.createElement('div'));
+                placesService.getDetails({ placeId: place.place_id }, function (details, status) {
+                    if (status === google.maps.places.PlacesServiceStatus.OK) {
+                        var province = getComponent(details, 'administrative_area_level_1');
+                        document.getElementById('province_input').value = province;
+                    }
+                });
+            }
+        });
+
+        function getComponent(place, type) {
+            for (var i = 0; i < place.address_components.length; i++) {
+                var component = place.address_components[i];
+                if (component.types.indexOf(type) !== -1) {
+                    return component.long_name;
+                }
+            }
+            return '';
+        }
+    }
+
+  </script>
+  <script>
+    function delete_event(event_id){
+        const event_name = '{{ event.name }}'
+        var confirm_event_delete = confirm("Are you sure you want to delete this event? This cannot be reversed.");
+        if (confirm_event_delete){
+            window.location.href = "{% url 'delete_event' event_id=0 %}".replace('0', event_id)
+        }
+    }
+  </script>
+  
+  
+{% endblock %}

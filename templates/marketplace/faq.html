@@ -1,0 +1,315 @@
+{% extends 'marketplace/base.html' %} {% load static %} {% block content %}
+
+
+  <img
+    src="{% static 'images\faq\1.png' %}"
+    alt="Banner Image Description"
+  />
+
+
+
+  <img
+    src="{% static 'images\faq\2.png' %}"
+    alt="Banner Image Description"
+  />
+
+
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap");
+
+  nav {
+    overflow: hidden;
+
+    padding: 0.5em;
+  }
+
+  nav ul {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    justify-content: space-around;
+  }
+
+  nav ul li {
+    display: inline;
+  }
+
+  nav ul li a {
+    color: #333;
+    text-decoration: none;
+    position: relative;
+  }
+
+  nav ul li a.active::after {
+    content: "";
+    display: block;
+    height: 1px;
+    background-color: #333;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: inline;
+    border-bottom: 1px solid #333;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+  }
+
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 1200px;
+    margin-block: 2rem;
+    gap: 2rem;
+  }
+
+  img {
+    max-width: 100%; /* Ensure the image doesn't exceed its container width */
+    height: auto; /* Maintain the image's aspect ratio */
+    border-radius: 8px; /* Add rounded corners to the image */
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    width: clamp(20rem, calc(20rem + 2vw), 22rem);
+    overflow: hidden;
+    box-shadow: 0 0.1rem 1rem rgba(0, 0, 0, 0.1);
+    border-radius: 1em;
+    background: #ece9e6;
+    background: linear-gradient(to right, #ffffff, #ece9e6);
+  }
+
+  .card__body {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .tag {
+    align-self: flex-start;
+    padding: 0.25em 0.75em;
+    border-radius: 1em;
+    font-size: 0.75rem;
+  }
+
+  .tag + .tag {
+    margin-left: 0.5em;
+  }
+
+  .tag-blue {
+    background: #56ccf2;
+    background: linear-gradient(to bottom, #2f80ed, #56ccf2);
+    color: #fafafa;
+  }
+
+  .tag-brown {
+    background: #d1913c;
+    background: linear-gradient(to bottom, #ffd194, #d1913c);
+    color: #fafafa;
+  }
+
+  .tag-red {
+    background: #cb2d3e;
+    background: linear-gradient(to bottom, #ef473a, #cb2d3e);
+    color: #fafafa;
+  }
+
+  .card__body h4 {
+    font-size: 1.5rem;
+    text-transform: capitalize;
+  }
+
+  .card__footer {
+    display: flex;
+    padding: 1rem;
+    margin-top: auto;
+  }
+
+  .user {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .user__image {
+    border-radius: 50%;
+  }
+
+  .user__info > small {
+    color: #666;
+  }
+
+  h1 {
+    font-size: 60px;
+    text-align: center;
+  }
+  a {
+    font-weight: bold;
+    font-size: 20px;
+  }
+
+  .modal {
+    position: center;
+    top: 10px;
+    left: 350px;
+    width: 100%;
+    height: 90%;
+
+    background-color: rgba(
+      0,
+      0,
+      0,
+      0.5
+    ); /* Semi-transparent background overlay */
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-content {
+    padding: 50px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .close-modal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #888;
+  }
+
+  header {
+    position: relative;
+    width: 100%;
+    height: 100vh; /* Set the height to 100% of the viewport height */
+    overflow: hidden;
+  }
+
+  img {
+    max-width: 100%; /* Ensure the image doesn't exceed its container width */
+    height: auto; /* Maintain the image's aspect ratio */
+    border-radius: 8px; /* Add rounded corners to the image */
+}
+</style>
+
+<h1>FAQ</h1>
+<div class="container">
+  {% for faq_card in faq_cards %}
+  <div class="card">
+    <div class="card__header">
+      {% if faq_card.image %}
+      <img
+        src="{{ faq_card.image.url }}"
+        alt="card__image"
+        class="card__image"
+        width="600"
+      />
+      {% else %}
+      <img
+        src="{% static 'path/to/default-image.jpg' %}"
+        alt="default__image"
+        class="card__image"
+        width="600"
+      />
+      {% endif %}
+    </div>
+    <div class="card__body">
+      <span class="tag tag-blue">{{ faq_card.tag }}</span>
+      <h4>{{ faq_card.title }}</h4>
+      <p>{{ faq_card.content }}</p>
+      <button class="view-details-btn" data-faq-id="{{ faq_card.id }}">
+        View Details
+      </button>
+    </div>
+    <div class="card__footer">
+      <div class="user">
+        <div class="user__info">
+          <small>{{ faq_card.timestamp|timesince }} ago</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Modal Container -->
+<div class="modal" id="myModal">
+  <div class="modal-content" id="modalContent">
+    <span class="close-modal" onclick="closeModal()">&times;</span>
+    <div id="scrollContainer" class="scroll-container">
+      <div id="detailsContainer"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Get modal elements
+  const modal = document.getElementById("myModal");
+  const modalContent = document.getElementById("modalContent");
+  const detailsContainer = document.getElementById("detailsContainer");
+  const scrollContainer = document.getElementById("scrollContainer"); // New container for scrolling
+
+  // Get all buttons that open the modal
+  const modalButtons = document.querySelectorAll(".view-details-btn");
+
+  // Add event listeners to each button
+  modalButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      // Get the FAQ ID from the button's data attribute
+      const faqId = this.getAttribute("data-faq-id");
+
+      // Fetch FAQ details from the server
+      fetch(`/marketplace/get_faq_details/${faqId}/`)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Data received:", data);
+
+          // Display the fetched data in the modal
+          detailsContainer.innerHTML = `
+                      <h2>${data.title}</h2>
+                      <p>${data.details}</p>
+                      <!-- Add more fields as needed -->
+                  `;
+
+          // Display the modal and enable scrolling
+          modal.style.display = "block";
+          scrollContainer.scrollTop = 0; // Scroll to the top
+        })
+        .catch((error) => console.error("Error fetching FAQ details:", error));
+    });
+  });
+
+  // Close the modal when the close button is clicked
+  function closeModal() {
+    modal.style.display = "none";
+  }
+
+  // Close the modal when clicking outside the modal content
+  window.addEventListener("click", function (event) {
+    if (event.target === modal) {
+      closeModal();
+    }
+  });
+</script>
+
+<style>
+  .scroll-container {
+    max-height: 450px; /* Set the maximum height for scrolling */
+    overflow-y: auto; /* Enable vertical scrolling */
+  }
+</style>
+
+{% endblock %}

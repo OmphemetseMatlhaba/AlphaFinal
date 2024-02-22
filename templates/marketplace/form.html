@@ -1,0 +1,187 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    /* Add some custom styles to enhance the look and feel */
+  
+
+    .left-column {
+        width: 50%; /* Adjust the width as needed */
+    }
+
+    .right-column {
+        width: 45%; /* Adjust the width as needed */
+        
+    }
+
+    form {
+        display: relative;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    label {
+        margin-bottom: 8px;
+        width: 100%; /* Set the label to take the full width */
+        text-align: left; /* Align text to the left */
+    }
+
+    input, select, textarea {
+        width: 400px; /* Set the input fields to take the full width */
+        padding: 8px;
+        margin-bottom: 16px;
+        box-sizing: border-box;
+    }
+
+    #image-preview {
+        max-width: 80%;
+        margin-bottom: 16px;
+    }
+
+    button {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+    h1,h2 {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
+
+      img {
+        max-width: 100%; /* Ensure the image doesn't exceed its container width */
+        height: auto; /* Maintain the image's aspect ratio */
+       
+    }
+
+   
+      
+      nav ul {
+        list-style-type: none;
+        padding: 0;
+        display: flex;
+        justify-content: space-around;
+      }
+      
+      nav ul li {
+        display: inline;
+      }
+      
+      nav ul li a {
+        color: #333;
+        text-decoration: none;
+        position: relative;
+      }
+      
+      nav ul li a.active::after {
+        content: "";
+        display: block;
+        height: 1px;
+        background-color: #333;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        display: inline;
+        border-bottom: 1px solid #333;
+      }
+      
+    
+      
+</style>
+
+<script>
+    function previewImage(input) {
+        var preview = document.getElementById('image-preview');
+        var file = input.files[0];
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            preview.src = e.target.result;
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    }
+</script> 
+
+<header>
+    
+    <img src="{% static 'images\farmers\hero.png' %}" alt="Banner Image Description">
+</header>
+<br><br>
+<nav>
+    <ul>
+      <li> <a href="{% url 'index' %}">Home</a></li>
+      <li><a href="{% url 'item:new' %}" class="">Add New Item</a></li>
+     
+    </ul>
+  </nav>
+  
+
+<h1>Add item</h1>
+<div class="container"> 
+   
+<div class="row">
+    <div class="left-column">
+    <form method="post" action="" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div>
+            <label for="{{ form.category.id_for_label }}">Category:</label>
+            {{ form.category }}
+        </div>
+
+        <div>
+            <label for="{{ form.name.id_for_label }}">Name:</label>
+            {{ form.name }}
+        </div>
+
+        <div>
+            <label for="{{ form.description.id_for_label }}">Description:</label>
+            {{ form.description }}
+        </div>
+
+        <div>
+            <label for="{{ form.price.id_for_label }}">Price:</label>
+            {{ form.price }}
+        </div>
+    </div>
+        
+        <!-- Other form fields -->
+
+        {% if form.errors or form.non_field_errors %}
+            <div>
+                {% for field in form %}
+                    {{ field.errors }} 
+                {% endfor %} 
+                
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="right-column">
+            <label for="id_image">Image:</label>
+            <img id="image-preview"  src="https://via.placeholder.com/1000x900" alt="Placeholder Image" class="product-image">
+            <input type="file" name="image" id="id_image" accept="image/*" onchange="previewImage(this)">
+
+            
+        </div>
+
+        <button type="submit">Submit</button>
+    </form>
+</div>
+</div>
+
+{% endblock %}

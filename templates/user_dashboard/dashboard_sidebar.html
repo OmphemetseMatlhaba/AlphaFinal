@@ -1,0 +1,28 @@
+{% load static %}
+
+<div class="col-lg-4 pb-5">
+   <div class="sticky-top pt-2">
+     <!-- Account Sidebar-->
+        <div class="author-card pb-3">
+            <div class="author-card-cover" style="background-image: url(https://img.freepik.com/free-photo/green-meadow-meanders-into-wheat-field-horizon-generated-by-ai_188544-36101.jpg?t=st=1705662392~exp=1705665992~hmac=3328d1e4e7e8dc4a1e830124af2904824b6f5ae58bb2fc4453612b1c6ba04ae6&w=996);"></div>
+            <div class="author-card-profile">
+                <a class="author-card-avatar" href="{{ profile_picture.url }}" data-lightbox="profile_picture">
+                    <img src="{{ profile_picture.url }}" alt="profile picture"> 
+                </a>
+                <div class="author-card-details">
+                    <h5 class="author-card-name text-lg">{{ user.first_name }} {{ user.last_name }}</h5><span class="author-card-position">Joined {{ user.date_joined|date:"d F Y" }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="wizard">
+            <nav class="list-group list-group-flush">
+                <a class="list-group-item {% if '/edit_profile' in request.path %}active{% endif %}" href="{% url 'edit_profile' %}">Profile Settings</a>
+                <a class="list-group-item {% if '/change_password' in request.path %}active{% endif %}" href="{% url 'change_password' %}">Change Password</a>
+                <a class="list-group-item {% if '/farm_info' in request.path %}active{% endif %}" href="{% url 'farm_info' %}">Farm Info</a>
+                <a class="list-group-item {% if '/user_analytics' in request.path %}active{% endif %}" href="{% url 'user_analytics' %}">Analytics</a>
+                <a class="list-group-item" href="#">Delete Profile</a>
+                <a class="list-group-item {% if '/logout' in request.path %}active{% endif %}" href="{% url 'logout' %}">Log Out</a>
+            </nav>
+        </div>
+   </div>
+</div>

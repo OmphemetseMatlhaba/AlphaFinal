@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Alpha | Your analytics{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        {% include 'user_dashboard/dashboard_sidebar.html' %}
+        <div class="col-md-8">
+            <h3 class="text-center mb-3">Your User Analytics</h3>
+            
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="accordion accordion-flush" id="accordionFlushExample">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="flush-headingOne">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                            AlphaHarvest &reg; Achievements
+                        </button>
+                    </h2>
+                    <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                        <div class="accordion-body">
+                            <table class="table table-borderless">
+                                <thead>
+                                    <td>Badge</td>
+                                    <td>Name</td>
+                                    <td>Description</td>
+                                </thead>
+                                <tbody>
+                                    {% for achievement in possible_achievements %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ achievement.image.url }}" data-lightbox="badges">
+                                                <img src="{{ achievement.image.url }}" alt="" class="rounded-circle" height="60px" data-lightbox="gallery">
+                                            </a>
+                                        </td>
+                                        <td class="align-middle">{{ achievement.name }}</td>
+                                        <td class="align-middle">{{ achievement.description }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="flush-headingTwo">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
+                            Your Current Achievements
+                        </button>
+                    </h2>
+                    <div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo" data-bs-parent="#accordionFlushExample">
+                        <div class="accordion-body">
+                            {% if achievement %}
+                            <table class="table table-borderless">
+                                <thead>
+                                    <td>Badge</td>
+                                    <td>Name</td>
+                                    <td>Description</td>
+                                </thead>
+                                <tbody>
+                                    {% for achievement in user_achievements %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ achievement.image.url }}" data-lightbox="badges">
+                                                <img src="{{ achievement.image.url }}" alt="" class="rounded-circle" height="60px" data-lightbox="gallery">
+                                            </a>
+                                        </td>
+                                        <td class="align-middle">{{ achievement.name }}</td>
+                                        <td class="align-middle">{{ achievement.description }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                                <p>You haven't acquired any AlphaHarvest Achievements yet</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block content %}
+
+<header>
+    
+    <img src="{% static 'images\farmers\hero1.png' %}" alt="Banner Image Description">
+  </header>
+
+<div class="container">
+    <h2>Hiring Requests</h2>
+    <table>
+        <tr>
+            <th>User</th>
+            <th>Equipment</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Document</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        {% for hire_request in hire_requests %}
+        <tr>
+            <td>{{ hire_request.user }}</td>
+            <td>{{ hire_request.equipment }}</td>
+            <td>{{ hire_request.start_date }}</td>
+            <td>{{ hire_request.end_date }}</td>
+            <td>
+                {% if hire_request.pdf_contract %}
+                    <a href="{{ hire_request.pdf_contract.url }}" target="_blank">View Document</a>
+                {% else %}
+                    No document uploaded
+                {% endif %}
+            </td>
+            <td>{{ hire_request.status }}</td>
+            <td>
+                <form action="{% url 'item:accept_hire_request' hire_request.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit">Accept</button>
+                </form>
+                <form action="{% url 'item:reject_hire_request' hire_request.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit">Reject</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<style>
+ 
+    img {
+        max-width: 100%; /* Ensure the image doesn't exceed its container width */
+        height: auto; /* Maintain the image's aspect ratio */
+        border-radius: 8px; /* Add rounded corners to the image */
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    th,
+    td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
+
+{% endblock %}

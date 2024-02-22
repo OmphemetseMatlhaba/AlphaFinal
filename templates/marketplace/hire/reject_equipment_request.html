@@ -1,0 +1,27 @@
+
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block content %}
+
+<header>
+    
+    <img src="{% static 'images\farmers\hero1.png' %}" alt="Banner Image Description">
+  </header>
+
+<h2>Reject Equipment Request</h2>
+<p>Are you sure you want to reject this equipment request?</p>
+<form action="{% url 'equipment:reject_request' request.pk %}" method="post">
+  {% csrf_token %}
+  <button type="submit">Reject</button>
+</form>
+<style>
+               
+                  
+
+  img {
+      max-width: 100%; /* Ensure the image doesn't exceed its container width */
+      height: auto; /* Maintain the image's aspect ratio */
+      border-radius: 8px; /* Add rounded corners to the image */
+  }
+</style>
+{% endblock %}

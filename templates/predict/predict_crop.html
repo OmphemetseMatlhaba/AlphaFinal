@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+<style>
+    form {
+        display: flex;
+        flex-direction: column;
+       
+    }
+
+    label {
+        margin-bottom: 5px;
+    }
+
+    img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+    }
+
+   
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+     
+    }
+
+    /* Add your additional styling as needed */
+
+</style>
+
+<header>
+    <img src="{% static 'images/faq/alphaPredict.png' %}" alt="Banner Image Description">
+</header>
+<h1 class="display-2 text-uppercase text-center mb-8" enctype="multipart/form-data">Get Crop Recommendation</h1>
+
+<div class="container" style="display: flex; justify-content: space-between;">
+
+    
+    <!-- Form on the left half -->
+    <div class="form-group" style="width: 48%;">
+        
+        <br><br>
+
+        <form method="post" action="{% url 'predict_crop' %}">
+            {% csrf_token %}
+            <label for="{{ form.nitrogen.id_for_label }}">Nitrogen:</label> {{ form.nitrogen }}
+            <label for="{{ form.phosphorus.id_for_label }}">Phosphorus:</label> {{ form.phosphorus }}
+            <label for="{{ form.potassium.id_for_label }}">Potassium:</label> {{ form.potassium }}
+            <label for="{{ form.temperature.id_for_label }}">Temperature:</label> {{ form.temperature }}
+            <label for="{{ form.humidity.id_for_label }}">Humidity:</label> {{ form.humidity }}
+            <label for="{{ form.pH.id_for_label }}">pH:</label> {{ form.pH }}
+            <label for="{{ form.rainfall.id_for_label }}">Rainfall:</label> {{ form.rainfall }}
+            <br><br>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+
+    <!-- Prediction on the right half -->
+    <div style="width: 48%;">
+        <div style="align-items: center;">
+        {% if predicted_crops %}
+        <h3>Prediction Results:</h3>
+        <ul>
+            {% for crop in predicted_crops %}
+                <li>{{ crop }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+         </div>
+    </div>
+
+</div>
+
+{% endblock %}
+

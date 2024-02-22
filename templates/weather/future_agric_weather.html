@@ -1,0 +1,400 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Alpha | Agric Forecast Weather{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="col-md-12 text-center m-3">
+        <h4>Future agricultural weather, {{ start_date }} to {{ end_date }}</h4>
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-center m-3">
+            <h4>Temperature</h4>
+            <div class="" id="temperature_chart"></div>
+        </div>
+        <div class="col-md-12 text-center m-3">
+            <h4>Weather</h4>
+            <div class="" id="weather_chart"></div>
+        </div>
+        <div class="col-md-12 text-center m-3">
+            <h4>Environment Variables</h4>
+            <div class="" id="environment_chart"></div>
+        </div>
+        <div class="col-md-12 text-center m-3">
+            <h4>Soil Moisture</h4>
+            <div class="" id="soil_moisture_chart"></div>
+        </div>
+        <div class="col-md-12 text-center m-3">
+            <h4>Soil Temperature</h4>
+            <div class="" id="soil_temp_chart"></div>
+        </div>
+
+        <div class="accordion" id="AgriAccordion">
+            {% for agri in ag_weather.data %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
+                      {{ agri.valid_date }}
+                    </button>
+                </h2>
+                <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#AgriAccordion">
+                    <div class="accordion-body">
+                        <div class="row">
+                            <div class="col">
+                                <div class="list-group list-group-flush">
+                                    <div class="list-group-item">Bulk Soil Density<span style="float: right;">{{ agri.bulk_soil_density }} kg/m³</span></div>
+                                    <div class="list-group-item">Max Skin Temperature<span style="float: right;">{{ agri.skin_temp_max }} °C</span></div>
+                                    <div class="list-group-item">Average Skin Temperature<span style="float: right;">{{ agri.skin_temp_avg }} °C</span></div>
+                                    <div class="list-group-item">Min Skin Temperature<span style="float: right;">{{ agri.skin_temp_min }} °C</span></div>
+                                    <div class="list-group-item">Average 2 Meter Temperature<span style="float: right;">{{ agri.temp_2m_avg }} °C</span></div>
+                                    <div class="list-group-item">Accumulated Precipitation<span style="float: right;">{{ agri.precip }} mm</span></div>
+                                    <div class="list-group-item">Average Specific Humidity<span style="float: right;">{{ agri.specific_humidity }} kg/kg</span></div>
+                                    <div class="list-group-item">Reference Evapotranspiration - ET0<span style="float: right;">{{ agri.evapotranspiration }} mm</span></div>
+                                    <div class="list-group-item">Average Surface Pressure<span style="float: right;">{{ agri.pres_avg }} mb</span></div>
+                                    <div class="list-group-item">Average 10 Meter Wind Speed<span style="float: right;">{{ agri.wind_10m_spd_avg }} m/s</span></div>
+                                    <div class="list-group-item">Average Hourly Downward Long-Wave Solar Radiation<span style="float: right;">{{ agri.dlwrf_avg }} W/m² · H</span></div>
+                                    <div class="list-group-item">Maximum Hourly Downward Long-Wave Solar Radiation<span style="float: right;">{{ agri.dlwrf_max }} W/m² · H</span></div>
+                                    <div class="list-group-item">Average Hourly Downward Short-Wave Solar Radiation<span style="float: right;">{{ agri.dswrf_avg }} W/m² · H</span></div>
+                                    <div class="list-group-item">Maximum Hourly Downward Short-Wave Solar Radiation<span style="float: right;">{{ agri.dswrf_max }} W/m² · H</span></div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="list-group list-group-flush">
+                                    <div class="list-group-item">Net Longwave Solar Radiation<span style="float: right;">{{ agri.dlwrf_net }} W/m² · D</span></div>
+                                    <div class="list-group-item">Net Shortwave Solar Radiation<span style="float: right;">{{ agri.dswrf_net }} W/m² · D</span></div>
+                                    <div class="list-group-item">Average Soil Moisture Content (0-10 cm depth)<span style="float: right;">{{ agri.soilm_0_10cm }} mm</span></div>
+                                    <div class="list-group-item">Average Soil Moisture Content (10-40 cm depth)<span style="float: right;">{{ agri.soilm_10_40cm }} mm</span></div>
+                                    <div class="list-group-item">Average Soil Moisture Content (40-100 cm depth)<span style="float: right;">{{ agri.soilm_40_100cm }} mm</span></div>
+                                    <div class="list-group-item">Average Soil Moisture Content (100-200 cm depth)<span style="float: right;">{{ agri.soilm_100_200cm }} mm</span></div>
+                                    <div class="list-group-item">Average Volumetric Soil Moisture Content (0-10 cm depth)<span style="float: right;">{{ agri.v_soilm_0_10cm }} fraction</span></div>
+                                    <div class="list-group-item">Average Volumetric Soil Moisture Content (10-40 cm depth)<span style="float: right;">{{ agri.v_soilm_10_40cm }} fraction</span></div>
+                                    <div class="list-group-item">Average Volumetric Soil Moisture Content (40-100 cm depth)<span style="float: right;">{{ agri.v_soilm_40_100cm }} fraction</span></div>
+                                    <div class="list-group-item">Average Volumetric Soil Moisture Content (100-200 cm depth)<span style="float: right;">{{ agri.v_soilm_100_200cm }} fraction</span></div>
+                                    <div class="list-group-item">Average Soil Temperature (0-10 cm depth)<span style="float: right;">{{ agri.soilt_0_10cm }} °C</span></div>
+                                    <div class="list-group-item">Average Soil Temperature (10-40 cm depth)<span style="float: right;">{{ agri.soilt_10_40cm }} °C</span></div>
+                                    <div class="list-group-item">Average Soil Temperature (40-100 cm depth)<span style="float: right;">{{ agri.soilt_40_100cm }} °C</span></div>
+                                    <div class="list-group-item">Average Soil Temperature (100-200 cm depth)<span style="float: right;">{{ agri.soilt_100_200cm }} °C</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var today = new Date().toISOString().split('T')[0];
+
+        document.getElementById('start_date').setAttribute('max', today);
+        document.getElementById('end_date').setAttribute('max', today);
+
+        document.getElementById('start_date').addEventListener('input', function () {
+            var startDate = new Date(this.value);
+            
+            var endDateInput = document.getElementById('end_date');
+            if (startDate > new Date(endDateInput.value)) {
+                endDateInput.value = this.value;
+            }
+        });
+
+        document.getElementById('end_date').addEventListener('input', function () {
+            var endDate = new Date(this.value);
+
+            var startDateInput = document.getElementById('start_date');
+            if (endDate < new Date(startDateInput.value)) {
+                startDateInput.value = this.value;
+            }
+        });
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+
+    const latitude = '{{ latitude }}'
+    const longitude = '{{ longitude }}'
+    const start_date = '{{ start_date }}'
+    const end_date = '{{ end_date }}'
+    var api_keys = 'a1aea166811f4436b42195f0b982052e';
+    var api_url = `https://api.weatherbit.io/v2.0/forecast/agweather?lat=${latitude}&lon=${longitude}&key=${api_keys}`;
+    const temperature_options = {
+        series: [
+            { 
+                name: 'Max Skin Temperature', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                type: 'line',
+            },{ 
+                name: 'Average Skin Temperature',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'column',
+            },{ 
+                name: 'Min Skin Temperature', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },
+        ],
+        chart: {
+            height: 400,
+            type: 'line',
+            stacked: 'false',
+        },
+        xaxis : {
+            title:{
+                text: 'Dates'
+            }
+        },
+        yaxis : {
+            title: {
+                text: 'Solar Radiation (°C)'
+            },
+            min: 0
+        },
+        colors: ['#050A30', '#000C66', '#7EC8E3'],
+        stroke: {
+            width: [2, 2, 2],
+            curve: 'smooth',
+        }
+    };
+
+    const temperature_chart = new ApexCharts(document.querySelector("#temperature_chart"), temperature_options);
+    temperature_chart.render();
+
+    const weather_options = {
+        series: [
+            { 
+                name: 'Average 2 Meter Temperature', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                type: 'line',
+            },{ 
+                name: 'Accumulated Precipitation', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },
+        ],
+        chart: {
+            height: 400,
+            type: 'line',
+            stacked: 'false',
+        },
+        xaxis : {
+            title:{
+                text: 'Dates'
+            }
+        },
+        yaxis : {
+            title: {
+                text: 'Weather Conditions'
+            },
+            min: 0
+        },
+        colors: ['#FBE7C6', '#B4F8C8'],
+        stroke: {
+            width: [6, 6],
+            curve: 'monotoneCubic',
+        }
+    };
+
+    const weather_chart = new ApexCharts(document.querySelector("#weather_chart"), weather_options);
+    weather_chart.render();
+
+    const environmental_options = {
+        series: [
+            { 
+                name: 'Average Surface Pressure', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                type: 'line',
+            },{ 
+                name: 'Average 10 Meter Wind Speed',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },{ 
+                name: 'Net Longwave Solar Radiation', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },
+        ],
+        chart: {
+            height: 400,
+            type: 'line',
+            stacked: 'false',
+        },
+        xaxis : {
+            title:{
+                text: 'Dates'
+            }
+        },
+        yaxis : {
+            title: {
+                text: 'Environmental Factors'
+            },
+            min: 0
+        },
+        colors: ['#B7AC44', '#FF4500', '#FF8300'],
+        stroke: {
+            width: [2, 2, 2],
+            curve: 'monotoneCubic',
+        }
+    };
+
+    const environment_chart = new ApexCharts(document.querySelector("#environment_chart"), environmental_options);
+    environment_chart.render();
+
+    const soil_moisture_options = {
+        series: [
+            { 
+                name: '0 to 10 cm', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                type: 'line',
+            },{ 
+                name: '10 to 40 cm',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },{ 
+                name: '40 to 100 cm', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },
+        ],
+        chart: {
+            height: 400,
+            type: 'line',
+            stacked: 'false',
+        },
+        xaxis : {
+            title:{
+                text: 'Dates'
+            }
+        },
+        yaxis : {
+            title: {
+                text: 'Soil Moisture',
+            },
+            min: 0
+        },
+        colors: ['#05E0E9', '#4E1A3D', '#CFEED1'],
+        stroke: {
+            width: [3, 3, 3],
+            curve: 'monotoneCubic',
+        }
+    };
+
+    const soil_moisture_chart = new ApexCharts(document.querySelector("#soil_moisture_chart"), soil_moisture_options);
+    soil_moisture_chart.render();
+
+    const soil_temp_options = {
+        series: [
+            { 
+                name: '0 to 10 cm', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                type: 'line',
+            },{ 
+                name: '10 to 40 cm',
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },{ 
+                name: '40 to 100 cm', 
+                data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                type: 'line',
+            },
+        ],
+        chart: {
+            height: 400,
+            type: 'line',
+            stacked: 'false',
+        },
+        xaxis : {
+            title:{
+                text: 'Dates'
+            }
+        },
+        yaxis : {
+            title: {
+                text: 'Soil Temperature (°C)',
+            },
+            min: 0
+        },
+        colors: ['#1E1514', '#013A20', '#ECD5BB'],
+        stroke: {
+            width: [3, 5, 3],
+            curve: 'monotoneCubic',
+        }
+    };
+
+    const soil_temp_chart = new ApexCharts(document.querySelector("#soil_temp_chart"), soil_temp_options);
+    soil_temp_chart.render();
+
+    function updateCharts(data) {
+        const temp_series = [
+            {
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.skin_temp_max }))
+            },{
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.skin_temp_avg }))
+            },{
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.skin_temp_min}))
+            },
+        ]
+        temperature_chart.updateSeries(temp_series)
+        
+        const weather_series = [
+            {
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.temp_2m_avg }))
+            },{
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.precip }))
+            }
+        ]
+        weather_chart.updateSeries(weather_series)
+
+        const enviroment_series = [
+            {
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.pres_avg }))
+            },{
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.wind_10m_spd_avg }))
+            },{
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.dlwrf_net }))
+            },
+        ]
+        environment_chart.updateSeries(enviroment_series)
+
+        const soil_moisture_series = [
+            {
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.soilm_0_10cm }))
+            },{
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.soilm_10_40cm }))
+            },{
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.soilm_40_100cm }))
+            },
+        ]
+        soil_moisture_chart.updateSeries(enviroment_series)
+
+        const soil_temp_series = [
+            {
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.soilt_0_10cm }))
+            },{
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.soilt_10_40cm }))
+            },{
+                data: data.map(entry => ({ x: entry.valid_date, y: entry.soilt_40_100cm }))
+            },
+        ]
+        soil_temp_chart.updateSeries(soil_temp_series)
+    }
+
+    fetch(api_url)
+        .then(response => {
+            if(!response.ok){
+                console.log('Something went wrong')
+            }
+            return response.json()
+        })
+        .then(data => {
+            const data_response = data.data;
+            updateCharts(data_response)
+        })
+        .catch(error => {
+            console.log('Error', error)
+        })
+
+
+</script>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Alpha | Create Post{% endblock %}
+{% block content %}
+
+<header>
+    <img src="{% static 'images\headers\1.png' %}" alt="Banner Image Description">
+  </header>
+
+<div class="container mt-5">
+    <div class="row">
+        {% include 'forum/forum_sidebar.html' %}
+        <div class="col-lg-8 pb-5">
+            {% include 'includes/alerts.html' %}
+            <div class="col-md-12 text-center">
+                <h2>Create Forum Post</h2>
+            </div>
+            <form method="post" action="{% url 'create_post' %}" >
+                {% csrf_token %}
+                {{ form.as_p }}
+                <br>
+                {{ form.media }}
+                <div class="col-md-12 text-center">
+                    <button type="submit" class="btn btn-secondary">Create Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .django-ckeditor-widget {
+        width: 100%;
+    }
+
+    img {
+        max-width: 100%; /* Ensure the image doesn't exceed its container width */
+        height: auto; /* Maintain the image's aspect ratio */
+        border-radius: 8px; /* Add rounded corners to the image */
+    }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+   $(document).ready(function () {
+        $('#id_sub_category').prop('disabled', true);
+
+        $('#id_category').change(function () {
+            var categoryId = $(this).val();
+
+            if (!categoryId) {
+                $('#id_sub_category').prop('disabled', true);
+                return;
+            }
+
+            $.ajax({
+                url: `get_subcategories/${categoryId}/`,
+                type: 'GET',
+                dataType: 'json', 
+                success: function (data) {
+                    $('#id_sub_category').html(''); 
+                    $.each(data, function(index, subcategory) {
+                        $('#id_sub_category').append('<option value="' + subcategory.id + '">' + subcategory.name + '</option>');
+                    });
+
+                    $('#id_sub_category').prop('disabled', false);
+                },
+                error: function (xhr, status, error) {
+                    console.log(`create_post/get_subcategories/${categoryId}/`);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

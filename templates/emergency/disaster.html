@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<body>
+
+
+    <style>
+        .card {
+            color: black;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .centered-button {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .centered-button:hover {
+            background-color: black;
+            color: white;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+       
+img {
+    max-width: 100%; /* Ensure the image doesn't exceed its container width */
+    height: auto; /* Maintain the image's aspect ratio */
+    border-radius: 8px; /* Add rounded corners to the image */
+}
+
+
+    </style>
+</head>
+
+<header>
+    <img src="{% static 'images\headers\3.png' %}" alt="Banner Image Description">
+  </header>
+<body>
+    <div class="container">
+        <h1>In case of emergency, please click the following:</h1>
+        <div class="row">
+            
+            <div class="col-md-4">
+              <div class="card">
+                  <div class="card-body">
+                      <h5 class="card-title">Emergency Alert</h5>
+                     
+
+                      
+                        
+                        <h1>Disaster Alert Form</h1>
+    
+    {% if error_message %}
+        <p style="color: red;">{{ error_message }}</p>
+    {% endif %}
+
+    <form method="post" action="{% url 'disaster_send' %}">
+        {% csrf_token %}
+        <label for="selected_location">Select Disaster:</label>
+        <select class="btn btn-secondary dropdown-toggle"  name="selected_location" id="selected_location" required>
+            <option value="" selected disabled>Select Disaster</option>
+            <option value="Wildfire">Wildfire</option>
+            <option value="Flood">Flood</option>
+            <option value="Flood">Farm Attack</option>
+            <!-- Add more disaster options as needed -->
+        </select>
+
+        <br><br>
+        <button class="btn btn-secondary "  type="submit">Send Disaster Alert</button>
+    </form>
+                      
+</div>
+                  </div>
+              </div>
+          </div>
+
+          <br> 
+
+          <div class="row">
+          <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+
+            <h1>Ambulance</h1>
+
+            <h5 class="card-title">10177 from a landline (toll free)</h5>
+            <h5 class="card-title"> 112 from a cellular phone (toll free).
+            </h5>
+
+            <button class="btn btn-secondary "  type="submit">Call</button>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+
+            <h1>Fire Services </h1>
+            <h5 class="card-title"> Disaster Management Center: 012 848 4602</h5>
+            <h5 class="card-title"> Provincial fire brigades: find  local fire brigade.</h5>
+            <button class="btn btn-secondary "  type="submit">Call</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+
+            <h1>Police</h1>
+            <h5 class="card-title"> Primary emergency number: 10111</h5>
+            <h5 class="card-title"> Crime Stop: Report crimes/anonymous tip-offs. Call 08600 10111.</h5>
+            <button class="btn btn-secondary "  type="submit">Call</button>
+
+                </div>
+            </div>
+            
+        </div>
+        
+          </div>
+          
+        
+</div>
+          
+    
+{% endblock %} 

@@ -1,0 +1,38 @@
+
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block content %}
+
+<header>
+    
+    <img src="{% static 'images\farmers\hero1.png' %}" alt="Banner Image Description">
+  </header>
+<h1>Equipment Request Detail</h1>
+<p><strong>ID:</strong> {{ request_obj.id }}</p>
+<p><strong>Category:</strong> {{ request_obj.category }}</p>
+<p><strong>Equipment:</strong> {{ request_obj.equipment }}</p>
+<p><strong>Price:</strong> {{ request_obj.price }}</p>
+<p><strong>Description:</strong> {{ request_obj.description }}</p>
+<!-- Display other fields as needed -->
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" name="accept">Accept</button>
+    <button type="submit" name="reject">Reject</button>
+</form>
+
+<!-- Construct the URL for request_detail -->
+<a href="{% url 'request_detail' request_obj.id %}">View Request Detail</a>
+
+<style>
+               
+                  
+
+    img {
+        max-width: 100%; /* Ensure the image doesn't exceed its container width */
+        height: auto; /* Maintain the image's aspect ratio */
+        border-radius: 8px; /* Add rounded corners to the image */
+    }
+</style>
+
+{% endblock %}

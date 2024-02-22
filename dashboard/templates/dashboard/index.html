@@ -1,0 +1,187 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block content %}
+
+<header>
+    
+    <img src="{% static 'images\farmers\hero.png' %}" alt="Banner Image Description">
+</header>
+
+<div class="container">
+
+  <!--- <h1>Welcome To Your Dashboad {{ user.username}}</h1> -->
+
+    
+    
+    <style>
+        .box {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+    
+        .account-details {
+            margin-bottom: 15px;
+        }
+    
+        .account-details p {
+            font-size: 16px;
+            margin: 5px 0;
+        }
+    
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: #ccc;
+            margin: 20px 0;
+        }
+    </style>
+
+    <nav>
+        <ul>
+          <li><a href=href="{% url 'index' %}">Home</a></li>
+          <li><a href="{% url 'item:new' %}" class="active">Add New Item</a></li>
+         
+        </ul>
+      </nav>
+      
+      <h2>My Items</h2>
+      <div class="box">
+      
+
+      <div class="table-responsive">
+          <table class="table table-bordered">
+              
+                  <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Price</th>
+                      <th>Image</th>
+                      <th>Action</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {% for item in items %}
+                      <tr>
+                          <td>{{ item.id }}</td>
+                          <td>{{ item.name }}</td>
+                          <td>R{{ item.price }}</td>
+                          <td><img src="{{ item.image.url }}" alt="{{ item.name }}" width="50"></td>
+                          <td>
+                              <a href="{% url 'item:detail' item.id %}" class="">View</a>
+                              <!-- Add other actions as needed, e.g., edit, delete -->
+                          </td>
+                      </tr>
+                  {% endfor %}
+              
+          </table>
+      </div>
+    </div>
+      
+
+<div class="container">
+    <h2 >My orders</h2>
+<div class="box">
+    
+
+    {% if orders %}
+        {% for order in orders %}
+            <div class="{% if order.fully_paid %}has-background-success-light{% else %}has-background-info-light{% endif %} mb-2 p-4">
+                <div class="columns is-multiline">
+                    <div class="column is-6">
+                        <h3 class="is-size-4">#{{ order.id }} - {{ order.first_name }} {{ order.last_name }}</h3>
+                    </div>
+
+                    <div class="column is-12">
+                        <b>Name:</b> {{ order.first_name }} {{ order.last_name }}<br>
+                        <b>Address:</b> {{ order.address }}<br>
+                        <b>Zip and place:</b> {{ order.postal_code }} {{ order.place }}<br>
+                        <b>E-mail:</b> {{ order.email }}<br>
+                        <b>Phone:</b> {{ order.phone }}
+
+                        <table class="table is-fullwidth mt-4">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Paid</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for item in order.items.all %}
+                                {% if item.user == request.user %}
+                                    <tr>
+                                        <td>{{ item.item.name }}</td>
+                                        <td>R{{ item.price }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>{{ item.user_paid|yesno:"Yes,No" }}</td>
+                                        <td>R{{ item.total_price }}</td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+</div>
+</div>
+
+<style>
+    nav {
+        overflow: hidden;
+      
+        padding: 0.5em;
+      }
+      
+      nav ul {
+        list-style-type: none;
+        padding: 0;
+        display: flex;
+        justify-content: space-around;
+      }
+      
+      nav ul li {
+        display: inline;
+      }
+      
+      nav ul li a {
+        color: #333;
+        text-decoration: none;
+        position: relative;
+      }
+      
+      nav ul li a.active::after {
+        content: "";
+        display: block;
+        height: 1px;
+        background-color: #333;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        display: inline;
+        border-bottom: 1px solid #333;
+      }
+      
+    
+    img {
+        max-width: 100%; /* Ensure the image doesn't exceed its container width */
+        height: auto; /* Maintain the image's aspect ratio */
+        border-radius: 8px; /* Add rounded corners to the image */
+    }
+
+ 
+   
+</style>
+       
+{% endblock %}
+
+

@@ -1,0 +1,717 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Alpha | Weather for {{ city }}{% endblock %}
+{% block content %}
+<!-- Header Start -->
+<div class="container-fluid d-flex align-items-center justify-content-center" style="background: rgb(0, 0, 0, 0.6); height: 700px;" data-parallax="scroll" data-image-src="https://img.freepik.com/free-photo/sky-clouds-cinematic-clouds-wallpaper-3_1562-740.jpg?w=826&t=st=1706455849~exp=1706456449~hmac=b93285f7e49e243c2d9738e4e18870e484c90519d3c6fea95d3c72e877b9a26b">
+    <div class="container">
+        <div class="col-md-12 text-center">
+            <h1 class="text-light" >Today at a glance</h1>
+        </div>
+        <div class="row">
+            <div class="col-md d-flex justify-content-center align-items-center header">
+                <form method="post" action="{% url 'weather' %}" class="input-group mb-3">
+                    {% csrf_token %}
+                    <input type="text" class="form-control border-2" id="address_input" name="address_input" placeholder="Search for another location" style="background-color: transparent; color: white;" required/>
+                    <input type="hidden" name="latitudeInput" id="latitudeInput">
+                    <input type="hidden" name="longitudeInput" id="longitudeInput">
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-outline-primary border-2" style="border-bottom-left-radius: 0; border-top-left-radius: 0;"><i class="bi bi-search"></i></button>
+                    </div>
+                </form>
+            </div>
+            <div class="p-3 text-center d-md-flex flex-md-column align-items-md-center d-lg-none">
+                <h3 class="mb-3 text-white">{{ city }}</h3>
+                <h2 class="text-white">{{ temperature }}&deg;C</h2>
+            </div>
+            <div class="col-md">
+                <div class="weather__card d-none d-md-none d-sm-none d-lg-block">
+                    <div class="d-flex flex-row justify-content-center align-items-center">
+                        <div class="p-3 d-none d-md-none d-sm-none d-lg-block">
+                            <h2 class="temperature_text">{{ temperature }}&deg;C</h2>
+                        </div>
+                        <div class="p-3 d-none d-md-none d-sm-none d-lg-block">
+                            {% if code >= 200 and code <= 299 %}
+                                <img src="{% static 'icons/cloud_bolt_light.svg' %}" alt="Thunder Icon">
+                            {% elif code >= 300 and code <= 522 %}
+                                <img src="{% static 'icons/cloud_rain_light.svg' %}" alt="Heavy rain icon">
+                            {% elif code >= 600 and code <= 699 %}
+                                <img src="{% static 'icons/snowflake_light.svg' %}" alt="Snow Icon">
+                            {% elif code == 800 %}
+                                <img src="{% static 'icons/sun_light.svg' %}" alt="Sun Icon">
+                            {% elif code >= 801 and code <= 803 %}
+                                <img src="{% static 'icons/cloud_sun_light.svg' %}" alt="Cloudy Day Icon">
+                            {% elif code == 804 %}
+                                <img src="{% static 'icons/cloud_light.svg' %}" alt="Cloudy Cloud Icon">
+                            {% else %}
+                                <img src="{% static 'icons/default.svg' %}" alt="Default Icon">
+                            {% endif %}
+                        </div>
+                        <div class="p-3 d-none d-md-none d-sm-none d-lg-block">
+                            <h5 id="currentDate" class="mb-3 text-white">{{ current_date }}</h5>
+                            <h3 class="mb-3">{{ city }}</h3>
+                            <span class="weather__description" class="mb-3">{{ description }}</span>
+                        </div>
+                    </div>                    
+                </div>
+                <div class="card card-2 d-none d-md-none d-sm-none d-lg-block" style="background-color: transparent;">       
+                    <div class="row">
+                        {% for day in five_day_data.data %}
+                            <div class="col" style="border-left: 1px solid rgb(201, 201, 201);">
+                                <div class="row row1">{{ day.datetime }}</div>
+                                <div class="row row2">
+                                    {% if day.weather.code >= 200 and day.weather.code <= 299 %}
+                                        <img class="img-fluid" src="{% static 'icons/cloud_bolt_light_2.svg' %}" alt="Thunder Icon">
+                                    {% elif day.weather.code >= 300 and day.weather.code <= 522 %}
+                                        <img class="img-fluid" src="{% static 'icons/cloud_rain_light.svg' %}" alt="Heavy Rain Icon">
+                                    {% elif day.weather.code >= 600 and day.weather.code <= 699 %}
+                                        <img class="img-fluid" src="{% static 'icons/snowflake_light.svg' %}" alt="Snow Icon">
+                                    {% elif day.weather.code == 800 %}
+                                        <img class="img-fluid" src="{% static 'icons/sun_light.svg' %}" alt="Sun Icon">
+                                    {% elif day.weather.code >= 801 and day.weather.code <= 803 %}
+                                        <img class="img-fluid" src="{% static 'icons/cloud_sun_light.svg' %}" alt="Cloudy Day Icon">
+                                    {% elif day.weather.code == 804 %}
+                                        <img class="img-fluid" src="{% static 'icons/cloud_light.svg' %}" alt="Cloudy Cloud Icon">
+                                    {% else %}
+                                        <img src="{% static 'icons/default.svg' %}" alt="Default Icon">
+                                    {% endif %}
+                                </div>
+                                <div class="row row3">{{ day.temp }}&deg;</div>
+                                <div class="row row4 text-center">{{ day.weather.description }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Header End -->
+
+<div class="container mt-5">
+    <div class="row">
+        <!-- MAIN CONTENT -->
+        <div class="col-lg-8 pb-4">
+            <!-- CURRENT WEATHER INFO -->
+            <div class="card card-1">
+                <div class="card-header bg-white">
+                    <div class="row">
+                        <div class="col-md-12 text-center mt-3 mb-3">
+                            <h4>Current Weather Info</h4>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="temp">{{ current_day.app_temp }} &deg;</div> 
+                                <div class="location">Weather currently Feels like:</div>
+                            </div>
+                            <div class="col-6 d-flex align-items-center justify-content-end text-center">
+                                {% if current_day.pod == 'd'%}
+                                    <img class="img-fluid" style="height: 100px; width: 100px;" src="{% static 'icons/sun.svg' %}">
+                                {% else %}
+                                    <img class="img-fluid" style="height: 100px; width: 100px;" src="{% static 'icons/moon.svg' %}">
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg">
+                            <div class="list-group-flush">
+                                <div class="list-group-item"><i class="bi bi-thermometer-half" ></i>&nbsp;Min/Max <span style="float: right;">{{ five_day_data.data.0.min_temp }}/{{ five_day_data.data.0.max_temp }}&nbsp;&deg;C</span></div>
+                                <div class="list-group-item"><i class="bi bi-speedometer2"></i>&nbsp;Pressure <span style="float: right;">{{ current_day.pres|floatformat:"2" }} mb</span></div>
+                                <div class="list-group-item"><i class="bi bi-water"></i>&nbsp;Sea Level Pressure <span style="float: right;">{{ current_day.slp|floatformat:"2" }} mb</span></div>
+                                <div class="list-group-item"><i class="bi bi-wind"></i>&nbsp;Wind Speed <span style="float: right;">{{ current_day.wind_spd|floatformat:"2" }} m/s</span></div>
+                            </div>
+                        </div>
+                        <div class="col-lg">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item"><i class="bi bi-eye"></i>&nbsp;Visibility<span style="float: right;">{{ current_day.vis }} KM</span></div>
+                                <div class="list-group-item"><i class="bi bi-umbrella"></i>&nbsp;Probability of rain <span style="float: right;">{{ five_day_data.data.0.pop }} %</span></div>
+                                <div class="list-group-item"><i class="bi bi-moisture"></i>&nbsp;Relative Humidity <span style="float: right;">{{ current_day.rh }} %</span></div>
+                                <div class="list-group-item"><i class="bi bi-compass"></i>&nbsp;Wind Direction <span style="float: right;">{{ current_day.wind_cdir_full }}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>  
+            <div class="card card-3 mt-3">
+                <div class="col-md-12 text-center m-3">
+                    <h4>24 hour weather pattern</h4>
+                    <div class="chart" id="chart"></div>
+                </div>
+            </div>
+            <div class="col-md-12 text-center m-3">
+                <h4>Explore More</h4>
+            </div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-4">
+                        <div class="forum-card">
+                            <div class="forum-card-background" style="background: url('https://img.freepik.com/free-photo/grassy-field-with-leafless-trees-distance-cloudy-sky-background_181624-4535.jpg?w=740&t=st=1706807541~exp=1706808141~hmac=89be5a5f7d68af59550ee5f3ec28136cb9db4bb4a4d4aaae16ef44ac0956e6d1') center center / cover; background-color: rgba(0, 0, 0, 0.3); filter: brightness(60%);"></div>
+                            <div class="overlay"></div>
+                            <div class="forum-card-category"><h2 class="text-white" style="font-size: 30px;">Past Weather Data</h2></div>
+                            <div class="forum-card-description">
+                                <span style="color: white;">Gain insight on past weather patterns, all the way up to 365 days back</span> <br>
+                                <div class="col-md-16 text-center">
+                                    <a href="{% url 'past_weather_data' lat=lat lon=lon %}" class="btn btn-primary">View More</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-4">
+                        <div class="forum-card">
+                            <div class="forum-card-background" style="background: url('https://img.freepik.com/free-photo/man-wearing-gas-mask_1385-610.jpg?w=740&t=st=1706808293~exp=1706808893~hmac=98d6e8231c4f482b7e833aa620e0d3b88b2b3b8167f9f66b681d1cfbc17ae114') center center / cover; background-color: rgba(0, 0, 0, 0.3); filter: brightness(60%);"></div>
+                            <div class="overlay"></div>
+                            <div class="forum-card-category"><h2 class="text-white" style="font-size: 30px;">Historical Air Quality</h2></div>
+                            <div class="forum-card-description">
+                                <span style="color: white;">Gain insight on past air quality analysis, all the way up to 365 days back</span> <br>
+                                <div class="col-md-12 text-center">
+                                    <a href="{% url 'past_air_quality' lat=lat lon=lon %}" class="btn btn-primary">View More</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-4">
+                        <div class="forum-card">
+                            <div class="forum-card-background" style="background: url('https://img.freepik.com/free-photo/green-tea-bud-leaves-green-tea-plantations-morning_335224-955.jpg?w=826&t=st=1706808455~exp=1706809055~hmac=6b08d14d3739458e4396ad379144b200e5983f7988aabef8e96baa5d20700b7c') center center / cover; background-color: rgba(0, 0, 0, 0.3); filter: brightness(60%);"></div>
+                            <div class="overlay"></div>
+                            <div class="forum-card-category"><h2 class="text-white" style="font-size: 30px;">Historical Agri Weather</h2></div>
+                            <div class="forum-card-description">
+                                <span style="color: white;">Gain insight on past agricultural analysis, all the way up to 365 days back</span> <br>
+                                <div class="col-md-12 text-center">
+                                    <a href="{% url 'past_agric_weather' lat=lat lon=lon %}" class="btn btn-primary">View More</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-6">
+                        <div class="forum-card d-flex flex-column align-items-center justify-content-center">
+                            <div class="forum-card-background" style="background: url('https://img.freepik.com/free-photo/green-sprouts-dark-soil-against-blurred-background-symbolizing-concept-growth-potential_90220-1462.jpg?t=st=1706809110~exp=1706812710~hmac=52adf040639333ffbaab3a65d0c8457143957ea9f5cf8e64d1cdcdfac824bda2&w=826') center center / cover; background-color: rgba(0, 0, 0, 0.3); filter: brightness(60%);"></div>
+                            <div class="overlay"></div>
+                            <div class="forum-card-category"><h2 class="text-white text-center"  style="font-size: 30px;">Agric Weather Forecast</h2></div>
+                            <div class="forum-card-description text-center text-white">
+                                <span>8 Day breakdown of agricultural weather. Get variables such as forecasted soil temperature, soil moisture, evapotranspiration and more</span> <br>
+                                <div class="col-md-12 mt-3">
+                                    <a href="{% url 'future_agric_weather' lat=lat lon=lon %}" class="btn btn-primary">View More</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-6">
+                        <div class="forum-card">
+                            <div class="forum-card-background" style="background: url('https://img.freepik.com/free-photo/winter-landscape-city-park_661209-592.jpg?w=826&t=st=1706809464~exp=1706810064~hmac=904608cd0b1615ad30d3d4ab9d6ec09e8b1ae73cefeb9d8a0c0eb3c5738ced7c') center center / cover; background-color: rgba(0, 0, 0, 0.3); filter: brightness(60%);"></div>
+                            <div class="overlay"></div>
+                            <div class="forum-card-category"><h2 class="text-white" style="font-size: 30px;">Weather Daily Forecast</h2></div>
+                            <div class="forum-card-description">
+                                <span style="color: white;">Get a detailed breakdown of the upcoming forecast. Up to 16 days.</span> <br>
+                                <div class="col-md-12 text-center">
+                                    <a href="{% url 'future_weather_daily' lat=lat lon=lon %}" class="btn btn-primary">View More</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 pb-4">
+            <div class="col-md-12 text-center m-3">
+                <h4>Current Air Quality</h4>
+            </div>
+            <div class="overflow-auto" style="max-height: 500px;">
+                {% for qual in air_quality.data %}
+                    <div class="card card-3">
+                        {% if qual.aqi <= 50 %}
+                            <div class="card-head justify-content-center text-center text-white" style="background: #116530">
+                                <div class="location mt-3" >Air Quality Index rating : Good.</div>
+                                <div class="temp text-white">{{ qual.aqi }}</div>
+                                <div class="location mb-3 container">Air quality is satisfactory, and air pollution poses little or no risk.</div>
+                            </div>
+                        {% elif qual.aqi <= 100 %}
+                            <div class="card-head justify-content-center text-center text-white" style="background: #D3BD71">
+                                <div class="location mt-3" >Air Quality Index rating : Moderate.</div>
+                                <div class="temp text-white">{{ qual.aqi }}</div>
+                                <div class="location mb-3 container">Air quality is acceptable; however, there may be a concern for some individuals 
+                                    who are sensitive to air pollution.</div>
+                            </div>
+                        {% elif qual.aqi <= 150 %}
+                            <div class="card-head justify-content-center text-center text-white" style="background: #CC6600">
+                                <div class="location mt-3" >Air Quality Index rating : Unhealthy for sensitive groups.</div>
+                                <div class="temp text-white">{{ qual.aqi }}</div>
+                                <div class="location mb-3 container">Members of sensitive groups (e.g., children, elderly, 
+                                    individuals with respiratory or heart conditions) 
+                                    may experience health effects, but the general public is less likely to be affected.</div>
+                            </div>
+                        {% elif qual.aqi <= 200 %}
+                            <div class="card-head justify-content-center text-center text-white" style="background: #990000">
+                                <div class="location mt-3" >Air Quality Index rating : Unhealthy.</div>
+                                <div class="temp text-white">{{ qual.aqi }}</div>
+                                <div class="location mb-3 container">Everyone may begin to experience adverse health effects, 
+                                    and members of sensitive groups may experience more serious effects.</div>
+                            </div>
+                        {% elif qual.aqi <= 300 %}
+                            <div class="card-head justify-content-center text-center text-light" style="background: #330066">
+                                <div class="location mt-3" >Air Quality Index rating : Very Unhealthy.</div>
+                                <div class="temp text-white">{{ qual.aqi }}</div>
+                                <div class="location mb-3 container">Health alert! 
+                                    everyone may experience more serious health effects.</div>
+                            </div>
+                        {% else %}
+                            <div class="card-head justify-content-center text-center text-light" style="background: #000000">
+                                <div class="location mt-3" >Air Quality Index rating : Hazardous.</div>
+                                
+                                <div class="location container">Health warnings of emergency conditions; 
+                                    the entire population is more likely to be affected</div>
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <div class="wizard">
+                                <div class="list-group list-group-flush">
+                                    <div class="list-group-item {% if qual.aqi <= 50%}color1{% elif qual.aqi <= 100 %}color2{% elif qual.aqi <= 150 %}color3{% elif qual.aqi <= 200 %}color4{% elif qual.aqi <= 300 %}color5{% else %}color6{% endif %}">Ozone (O3) <span style="float: right;">{{ qual.o3 }} µg/m³</span></div>
+                                    <div class="list-group-item {% if qual.aqi <= 50%}color1{% elif qual.aqi <= 100 %}color2{% elif qual.aqi <= 150 %}color3{% elif qual.aqi <= 200 %}color4{% elif qual.aqi <= 300 %}color5{% else %}color6{% endif %}">Sulfur Dioxide (SO2)<span style="float: right;">{{ qual.so2 }} µg/m³</span></div>
+                                    <div class="list-group-item {% if qual.aqi <= 50%}color1{% elif qual.aqi <= 100 %}color2{% elif qual.aqi <= 150 %}color3{% elif qual.aqi <= 200 %}color4{% elif qual.aqi <= 300 %}color5{% else %}color6{% endif %}">Nitrogen Dioxide (NO2)<span style="float: right;">{{ qual.no2 }} µg/m³</span</div></div>
+                                    <div class="list-group-item {% if qual.aqi <= 50%}color1{% elif qual.aqi <= 100 %}color2{% elif qual.aqi <= 150 %}color3{% elif qual.aqi <= 200 %}color4{% elif qual.aqi <= 300 %}color5{% else %}color6{% endif %}">Carbon Monoxide (CO)<span style="float: right;">{{ qual.co }} µg/m³</span></div></div>
+                                    <div class="list-group-item {% if qual.aqi <= 50%}color1{% elif qual.aqi <= 100 %}color2{% elif qual.aqi <= 150 %}color3{% elif qual.aqi <= 200 %}color4{% elif qual.aqi <= 300 %}color5{% else %}color6{% endif %}">Particulate matter < 2.5 Micr. <span style="float: right;">{{ qual.pm25 }} µg/m³</span></div>
+                                    <div class="list-group-item {% if qual.aqi <= 50%}color1{% elif qual.aqi <= 100 %}color2{% elif qual.aqi <= 150 %}color3{% elif qual.aqi <= 200 %}color4{% elif qual.aqi <= 300 %}color5{% else %}color6{% endif %}">Particulate matter < 10 micr.s<span style="float: right;">{{ qual.pm10 }} µg/m³</span></div>
+                                    <div class="list-group-item {% if qual.aqi <= 50%}color1{% elif qual.aqi <= 100 %}color2{% elif qual.aqi <= 150 %}color3{% elif qual.aqi <= 200 %}color4{% elif qual.aqi <= 300 %}color5{% else %}color6{% endif %}">Tree Pollen Level
+                                        <span style="float: right;">
+                                            {% if qual.pollen_level_tree == 0 %}
+                                                None
+                                            {% elif qual.pollen_level_tree == 1 %}
+                                                Low
+                                            {% elif qual.pollen_level_tree == 2 %}
+                                                Moderate
+                                            {% elif qual.pollen_level_tree == 3 %}
+                                                High
+                                            {% else %}
+                                                Very High
+                                            {% endif %} 
+                                        </span>
+                                    </div>
+                                    <div class="list-group-item  {% if qual.aqi <= 50%}color1{% elif qual.aqi <= 100 %}color2{% elif qual.aqi <= 150 %}color3{% elif qual.aqi <= 200 %}color4{% elif qual.aqi <= 300 %}color5{% else %}color6{% endif %}">Grass Pollen Level
+                                        <span style="float: right;">
+                                            {% if qual.pollen_level_grass == 0 %}
+                                                None
+                                            {% elif qual.pollen_level_grass == 1 %}
+                                                Low
+                                            {% elif qual.pollen_level_grass == 2 %}
+                                                Moderate
+                                            {% elif qual.pollen_level_grass == 3 %}
+                                                High
+                                            {% else %}
+                                                Very High
+                                            {% endif %} 
+                                        </span>
+                                    </div>
+                                    <div class="list-group-item  {% if qual.aqi <= 50%}color1{% elif qual.aqi <= 100 %}color2{% elif qual.aqi <= 150 %}color3{% elif qual.aqi <= 200 %}color4{% elif qual.aqi <= 300 %}color5{% else %}color6{% endif %}">Weed Pollen Level
+                                        <span style="float: right;">
+                                            {% if qual.pollen_level_Weed == 0 %}
+                                                None
+                                            {% elif qual.pollen_level_Weed == 1 %}
+                                                Low
+                                            {% elif qual.pollen_level_Weed == 2 %}
+                                                Moderate
+                                            {% elif qual.pollen_level_Weed == 3 %}
+                                                High
+                                            {% else %}
+                                                Very High
+                                            {% endif %} 
+                                        </span>
+                                    </div>
+                                    <div class="list-group-item {% if qual.aqi <= 50%}color1{% elif qual.aqi <= 100 %}color2{% elif qual.aqi <= 150 %}color3{% elif qual.aqi <= 200 %}color4{% elif qual.aqi <= 300 %}color5{% else %}color6{% endif %}">Mold Level
+                                        <span style="float: right;">
+                                            {% if qual.mold_level == 0 %}
+                                                None
+                                            {% elif qual.mold_level == 1 %}
+                                                Low
+                                            {% elif qual.mold_level == 2 %}
+                                                Moderate
+                                            {% elif qual.mold_level == 3 %}
+                                                High
+                                            {% else %}
+                                                Very High
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    <div class="list-group-item  {% if qual.aqi <= 50%}color1{% elif qual.aqi <= 100 %}color2{% elif qual.aqi <= 150 %}color3{% elif qual.aqi <= 200 %}color4{% elif qual.aqi <= 300 %}color5{% else %}color6{% endif %}">Predominant Pollen Type<span style="float: right;">{{ qual.predominant_pollen_type }}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                <div class="col-md-12 text-center m-3">
+                    <h4>Agricultaral Variables For {{ current_date }}</h4>
+                </div>
+                <div class="overflow-auto sticky-top" style="max-height: 500px;">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item" data-toggle="tooltip" data-placement="top" title="The mass of soil per unit volume, including both solid particles and pore spaces">Bulk Soil Density <span style="float: right;">{{ agris.data.0.bulk_soil_density }} kg/m^3</span></div>
+                        <div class="list-group-item" data-toggle="tooltip" data-placement="top" title="The average temperature measured at the skin level, providing insights into local atmospheric conditions">Average Skin Temperature <span style="float: right;">{{ agris.data.0.skin_temp_avg }} &deg;C</span></div>
+                        <div class="list-group-item" data-toggle="tooltip" data-placement="top" title="The average temperature at a height of 2 meters above the ground, offering a standard measure of ambient air temperature.">Average 2 Meter Temperature <span style="float: right;">{{ agris.data.0.temp_2m_avg }} &deg;C</span></div>
+                        <div class="list-group-item" data-toggle="tooltip" data-placement="top" title="The total amount of rainfall or snowfall accumulated over a specific period, indicating precipitation levels.">Accumulated Precipitation <span style="float: right;">{{ agris.data.0.precip }} mm</span></div>
+                        <div class="list-group-item" data-toggle="tooltip" data-placement="top" title="The amount of water vapor returned to the atmosphere through evaporation and plant transpiration, serving as a reference for water management.">Reference Evapotranspiration <span style="float: right;">{{ agris.data.0.evapotranspiration }} MM</span></div>
+                        <div class="list-group-item" data-toggle="tooltip" data-placement="top" title="The average atmospheric pressure exerted on the Earth's surface, a key metric for understanding weather patterns and conditions">Average Surface Pressure <span style="float: right;">{{ agris.data.0.pres_avg }} mb</span></div>
+                        <div class="list-group-item" data-toggle="tooltip" data-placement="top" title="The average speed of the wind measured at a height of 10 meters above the ground, providing information on local wind conditions.">Average 10 meter wind speed <span style="float: right;">{{ agris.data.0.wind_10m_spd_avg }} m/s</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" name="lat" id="lat" value="{{ lat }}">
+<input type="hidden" name="lon" id="lon" value="{{ lon }}">
+
+
+<style>
+    /*--------------------------------------------------------------
+    # Cover Page #
+    --------------------------------------------------------------*/
+    .light{
+        color:#dcdcdc;
+        font-weight: 400;
+    }
+    .weather__card {
+        width: 800px;
+        padding: 40px 30px;
+        border-radius: 20px;
+        color:white;
+    }
+    .weather__card h2 {
+        font-size:120px;
+        font-weight:700;
+        color:white;
+        line-height: .8;
+    }
+    .weather__card h3 {
+        font-size: 40px;
+        font-weight: 600;
+        line-height: .8;
+        color:rgb(201, 201, 201);
+    }
+    .weather__card h5 {
+        font-size: 20px;
+        font-weight: 400;
+        line-height: .1;
+        color:#9D9D9D;
+    }
+    .weather__card img {
+        width: 120px;
+        height: 120px;
+    }
+    .weather__card .weather__description {
+        background-color: #fff;
+        border-radius: 25px;
+        padding: 5px 13px;
+        border:0;
+        outline: none;
+        color:#7F8487;
+        font-size: .956rem;
+        font-weight: 400;
+    }
+    .img-fluid{
+        float: right;
+        width: 65%;
+        display: flex;
+        align-items: center;
+    }
+    .row2 .img-fluid{
+        margin: 10% 0;
+        opacity: 0.5;
+        width: 40%;
+    }
+    .card-2 .row{
+        justify-content: center;
+    }
+    .row1{
+        font-size: 16px;
+        font-weight: bold;
+        color: white;
+    }
+    .row3{
+        font-size: 20px;
+        font-weight: bold;
+        color: white;
+    }
+    .row4{
+        font-size: 15px;
+        color: rgb(201, 201, 201);
+    }
+    .temp{
+        font-size: 5rem;
+        color: rgb(57, 57, 58);
+    }
+    .card-1{
+        background:transparent;
+    }
+    .list-group-item:hover i{
+        color: white;
+    }
+    #chart{
+        width: 99%;
+    }  
+
+    .color1:hover{
+        background-color: #116530;
+        color: white;
+    }
+
+    .color2:hover{
+        background-color: #D3BD71;
+        color: white;
+    }
+
+    .color3:hover{
+        background-color: #CC6600;
+        color: white;
+    }
+
+    .color4:hover{
+        background-color: #990000;
+        color: white;
+    }
+
+    .color5:hover{
+        background-color: #330066;
+        color: white
+    }
+    .color6:hover{
+        background-color: #000000;
+        color: white;
+    }
+    .forum-card {
+        height: 300px;
+        background-size: cover !important;
+        color: white;
+        position: relative;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        transition: 0.3s ease-in-out;
+        overflow: hidden;
+    }
+
+    .forum-card-background {
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .overlay {
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .forum-card:hover .overlay {
+        opacity: 1;
+    }
+    .forum-card:hover .forum-card-background {
+        filter: blur(2px);
+    }
+
+    .forum-card:hover {
+        transform: scale(1.1);
+    }
+
+    .forum-card-category {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 20px;
+    }
+
+    .forum-card-description {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+    }
+
+    .forum-card-description h2 {
+        font-size: 17px;
+    }
+
+    .forum-card-description a {
+        font-size: 15px;
+        text-align: center;
+        justify-content: center;
+
+    }
+    @media (max-width: 767px) {
+        .temperature-container{
+            text-align: center;
+        }
+        .temperature_text{
+            font-size: 10px;
+        }
+        .temp{
+            font-size: 40px;
+        }
+        .location{
+            font-size: 20px
+        }
+    }
+
+    @media (min-width: 768px) {
+        .temperature-container {
+            text-align: left;
+        }
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    const latInput = document.getElementById('lat');
+    const lonInput = document.getElementById('lon');
+    const lat = latInput.value;
+    const lon = lonInput.value;
+    const api_key = 'a1aea166811f4436b42195f0b982052e'
+    const api_url = `https://api.weatherbit.io/v2.0/forecast/hourly?lat=${lat}&lon=${lon}&key=${api_key}&hours=25`;
+
+    var options = {
+          series: [{
+          name: 'Probability of Rain ( % )',
+          type: 'column',
+          data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        }, {
+          name: 'Temperature ( °C )',
+          type: 'area',
+          data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        }, {
+          name: 'Wind Speed ( km/h )',
+          type: 'line',
+          data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        }],
+          chart: {
+          height: 350,
+          type: 'line',
+          stacked: false,
+        },
+        stroke: {
+          width: [1, 2, 5],
+          curve: 'smooth'
+        },
+        plotOptions: {
+          bar: {
+            columnWidth: '50%'
+          }
+        },
+        fill: {
+          opacity: [0.85, 0.50, 1],
+          gradient: {
+            inverseColors: false,
+            shade: 'light',
+            type: "vertical",
+            opacityFrom: 0.85,
+            opacityTo: 0.55,
+            stops: [100, 0, 100, 100],
+          }
+        },
+        labels: ['01/01/2003', '02/01/2003', '03/01/2003', '04/01/2003', '05/01/2003', '06/01/2003', '07/01/2003',
+          '08/01/2003', '09/01/2003', '10/01/2003', '11/01/2003'
+        ],
+        colors: ['#116530', '#990000', '#D3BD71',],
+        markers: {
+          size: 0
+        },
+        xaxis: {
+          type: 'datetime'
+        },
+        yaxis: {
+          min: 0
+        },
+        tooltip: {
+          shared: true,
+          intersect: false,
+          y: {
+            formatter: function (y) {
+              if (typeof y !== "undefined") {
+                return y.toFixed(0) + "";
+              }
+              return y;
+        
+            }
+          }
+        }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#chart"), options);
+        chart.render();
+      
+      
+    
+
+    function updateChart(data) {
+        const newSeries = [
+            {
+                name: 'Probability of Rain ( % )',
+                type: 'area',
+                data: data.map(entry => ({ x: entry.timestamp_local, y: entry.pop })),
+            },
+            {
+                name: 'Temperature ( °C )',
+                type: 'line',
+                data: data.map(entry => ({ x: entry.timestamp_local, y: entry.temp })),
+            },
+            {
+                name: 'Wind Speed ( km/h )',
+                type: 'column',
+                data: data.map(entry => ({ x: entry.timestamp_local, y: entry.wind_spd })),
+            },
+        ];
+
+        chart.updateSeries(newSeries);
+    }
+
+
+    fetch(api_url)
+        .then(response => {
+            if(!response.ok){
+                console.log('Something went wrong')
+            }
+            return response.json()
+        })
+        .then(data => {
+            const data_response = data.data;
+            updateChart(data_response)
+        })
+        .catch(error => {
+            console.log('Error', error)
+        })
+
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAbrH17xrTrz1QzXIbJIi47F4jX234p8QU&libraries=places&callback=initAutocomplete" async defer></script>
+<script>
+    function initAutocomplete() {
+        var input = document.getElementById('address_input');
+        var latitude_input = document.getElementById('latitudeInput');
+        var longitude_input = document.getElementById('longitudeInput');
+
+        var options = {
+            types: ['address'], 
+            componentRestrictions: { country: 'ZA' } 
+        };
+        var autocomplete = new google.maps.places.Autocomplete(input, options);
+
+        autocomplete.addListener('place_changed', function () {
+            var place = autocomplete.getPlace();
+            var lat = place.geometry.location.lat();
+            var lng = place.geometry.location.lng();
+            latitude_input.value = lat;
+            longitude_input.value = lng;
+        });
+        input.addEventListener('input', function () {
+        if (input.value.length >= 4) {
+            autocomplete.setBounds(map.getBounds());
+            autocomplete.getPlace();
+        }
+        });
+
+        
+    }
+</script>
+{% endblock %}

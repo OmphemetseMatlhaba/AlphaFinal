@@ -1,0 +1,127 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <h1> Inbox </h1>
+
+        {% for chat in chats %}
+            <a href="{% url 'chat:chatDetail' chat.id %}" class="chat-item">
+                <div class="chat-thumbnail">
+                    <img src="{{ chat.item.image.url }}" alt="{{ chat.item.name }}">
+                </div>
+                <div class="chat-details">
+                    {% for farmer in chat.farmer.all %}
+                        {% if farmer != request.user %}
+                            <p class="farmer-info">{{ farmer.username }} | {{ chat.modified_at }}</p>
+                        {% endif %}
+                    {% endfor %}
+                    <p class="item-name">{{ chat.item.name }}</p>
+                    <p>Buy</p>
+                    <!-- Add any additional content you want here -->
+                </div>
+            </a>
+        {% endfor %}
+
+        {% for equipment_chat in equipment_chats %}
+            <a href="{% url 'chat:equipment_chat_detail' equipment_chat.id %}" class="chat-item">
+                <div class="chat-thumbnail">
+                    <img src="{{ equipment_chat.equipment.image.url }}" alt="{{ equipment_chat.equipment.name }}">
+                </div>
+                <div class="chat-details">
+                    {% for farmer in equipment_chat.farmer.all %}
+                        {% if farmer != request.user %}
+                            <p class="farmer-info">{{ farmer.username }} | {{ equipment_chat.modified_at }}</p>
+                        {% endif %}
+                    {% endfor %}
+                    <p class="equipment-name">{{ equipment_chat.equipment.name }}</p>
+                    <p>Hire</p>
+                    <!-- Add any additional content you want here -->
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+
+    <style>
+        nav {
+            overflow: hidden;
+            padding: 0.5em;
+        }
+
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        nav ul li {
+            display: inline;
+        }
+
+        nav ul li a {
+            color: #333;
+            text-decoration: none;
+            position: relative;
+        }
+
+        nav ul li a.active::after {
+            content: "";
+            display: block;
+            height: 1px;
+            background-color: #333;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: inline;
+            border-bottom: 1px solid #333;
+        }
+
+        .container {
+            /* Add your container styles here */
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .chat-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .chat-thumbnail {
+            margin-right: 15px;
+        }
+
+        .chat-thumbnail img {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 5px;
+        }
+
+        .chat-details {
+            flex-grow: 1;
+        }
+
+        .farmer-info {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .item-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+{% endblock %}

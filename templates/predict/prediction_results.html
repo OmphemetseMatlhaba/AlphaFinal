@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<h1 class="display-2 text-uppercase text-center mb-8">Results</h1>
+
+<div class="container text-center mb-8">
+    <p>Based on your input</p>
+    
+<h2>Predicted Crop: {{ form.cleaned_data.predicted_crop }}</h2>
+</div>
+{% endblock %}
